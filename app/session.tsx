@@ -32,6 +32,7 @@ export default function SessionScreen() {
   const [index, setIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(stretches[0]?.duration ?? 30);
   const [isRunning, setIsRunning] = useState(true);
+  const [totalTimeSpent, setTotalTimeSpent] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const current = stretches[index];
@@ -47,13 +48,21 @@ export default function SessionScreen() {
         }
         return t - 1;
       });
+      setTotalTimeSpent(t => t + 1);
     }, 1000);
     return () => clearInterval(intervalRef.current!);
   }, [isRunning, index]);
 
   const goNext = () => {
     if (isLast) {
-      router.replace('/');
+      router.replace({
+        pathname: '/complete',
+        params: {
+          count: stretches.length.toString(),
+          totalTime: totalTimeSpent.toString(),
+          streak: '1',
+        }
+      });
       return;
     }
     const next = index + 1;
