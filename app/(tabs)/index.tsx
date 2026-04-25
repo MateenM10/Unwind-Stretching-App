@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
@@ -9,6 +10,7 @@ const positions = [
 
 export default function PositionPicker() {
   const [selected, setSelected] = useState<string[]>([]);
+  const router = useRouter();
 
   const toggle = (id: string) => {
     setSelected(prev =>
@@ -45,7 +47,10 @@ export default function PositionPicker() {
       </TouchableOpacity>
 
       {selected.length > 0 && (
-        <TouchableOpacity style={styles.startButton}>
+        <TouchableOpacity
+          style={styles.startButton}
+          onPress={() => router.push({ pathname: '/bodypart', params: { positions: selected.join(',') } })}
+        >
           <Text style={styles.startText}>Start Stretching →</Text>
         </TouchableOpacity>
       )}
@@ -54,16 +59,16 @@ export default function PositionPicker() {
 }
 
 const styles = StyleSheet.create({
-  container:          { flex: 1, backgroundColor: '#0f0f0f', padding: 24, justifyContent: 'center' },
-  title:              { fontSize: 28, fontWeight: '700', color: '#fff', marginBottom: 6 },
-  subtitle:           { fontSize: 15, color: '#888', marginBottom: 32 },
-  card:               { backgroundColor: '#1a1a1a', borderRadius: 16, padding: 20, marginBottom: 12, borderWidth: 2, borderColor: 'transparent' },
-  cardSelected:       { borderColor: '#a78bfa' },
-  cardLabel:          { fontSize: 18, fontWeight: '600', color: '#fff' },
-  cardDesc:           { fontSize: 13, color: '#888', marginTop: 4 },
-  allButton:          { borderRadius: 16, padding: 18, marginBottom: 12, borderWidth: 2, borderColor: '#444', alignItems: 'center' },
-  allButtonSelected:  { borderColor: '#a78bfa', backgroundColor: '#1a1a1a' },
-  allButtonText:      { fontSize: 16, fontWeight: '600', color: '#a78bfa' },
-  startButton:        { backgroundColor: '#a78bfa', borderRadius: 16, padding: 18, alignItems: 'center', marginTop: 8 },
-  startText:          { fontSize: 17, fontWeight: '700', color: '#fff' },
+  container:         { flex: 1, backgroundColor: '#0f0f0f', padding: 24, justifyContent: 'center' },
+  title:             { fontSize: 28, fontWeight: '700', color: '#fff', marginBottom: 6 },
+  subtitle:          { fontSize: 15, color: '#888', marginBottom: 32 },
+  card:              { backgroundColor: '#1a1a1a', borderRadius: 16, padding: 20, marginBottom: 12, borderWidth: 2, borderColor: 'transparent' },
+  cardSelected:      { borderColor: '#a78bfa' },
+  cardLabel:         { fontSize: 18, fontWeight: '600', color: '#fff' },
+  cardDesc:          { fontSize: 13, color: '#888', marginTop: 4 },
+  allButton:         { borderRadius: 16, padding: 18, marginBottom: 12, borderWidth: 2, borderColor: '#444', alignItems: 'center' },
+  allButtonSelected: { borderColor: '#a78bfa', backgroundColor: '#1a1a1a' },
+  allButtonText:     { fontSize: 16, fontWeight: '600', color: '#a78bfa' },
+  startButton:       { backgroundColor: '#a78bfa', borderRadius: 16, padding: 18, alignItems: 'center', marginTop: 8 },
+  startText:         { fontSize: 17, fontWeight: '700', color: '#fff' },
 });
