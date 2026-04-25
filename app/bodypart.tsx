@@ -1,16 +1,16 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const BODY_PARTS = [
-  { id: 'neck',       label: '🫸  Neck',        },
-  { id: 'shoulders',  label: '💪  Shoulders',   },
-  { id: 'chest',      label: '🫁  Chest',        },
-  { id: 'back',       label: '🔙  Back',         },
-  { id: 'hips',       label: '🦴  Hips',         },
-  { id: 'quads',      label: '🦵  Quads',        },
-  { id: 'hamstrings', label: '🦵  Hamstrings',   },
-  { id: 'calves',     label: '🦶  Calves',       },
-  { id: 'ankles',     label: '⭕  Ankles',       },
+  { id: 'neck',       label: '🙆  Neck'       },
+  { id: 'shoulders',  label: '💪  Shoulders'  },
+  { id: 'chest',      label: '❤️  Chest'       },
+  { id: 'back',       label: '🔄  Back'        },
+  { id: 'hips',       label: '🌀  Hips'        },
+  { id: 'quads',      label: '🦵  Quads'       },
+  { id: 'hamstrings', label: '🦵  Hamstrings'  },
+  { id: 'calves',     label: '🦶  Calves'      },
+  { id: 'ankles',     label: '🔁  Ankles'      },
 ];
 
 export default function BodyPartPicker() {
@@ -18,46 +18,42 @@ export default function BodyPartPicker() {
   const router = useRouter();
 
   const handleSelect = (bodyPart: string) => {
-    router.push({
-      pathname: '/session',
-      params: { positions, bodyPart }
-    });
+    router.push({ pathname: '/session', params: { positions, bodyPart } });
   };
 
   const handleGeneral = () => {
-    router.push({
-      pathname: '/session',
-      params: { positions, bodyPart: 'general' }
-    });
+    router.push({ pathname: '/session', params: { positions, bodyPart: 'general' } });
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Any focus today?</Text>
-      <Text style={styles.subtitle}>Pick one area, or go general</Text>
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <StatusBar barStyle="light-content" backgroundColor="#0f0f0f" />
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.title}>Any focus today?</Text>
+        <Text style={styles.subtitle}>Pick one area, or go general</Text>
 
-      {/* General option at the top */}
-      <TouchableOpacity style={styles.generalButton} onPress={handleGeneral}>
-        <Text style={styles.generalLabel}>✦  General — stretch everything</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.generalButton} onPress={handleGeneral}>
+          <Text style={styles.generalLabel}>✦  General — stretch everything</Text>
+        </TouchableOpacity>
 
-      <Text style={styles.divider}>— or focus on —</Text>
+        <Text style={styles.divider}>— or focus on —</Text>
 
-      {/* Single select body parts */}
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {BODY_PARTS.map(part => (
-          <TouchableOpacity
-            key={part.id}
-            style={styles.card}
-            onPress={() => handleSelect(part.id)}
-          >
-            <Text style={styles.cardLabel}>{part.label}</Text>
-            <Text style={styles.arrow}>›</Text>
-          </TouchableOpacity>
-        ))}
-        <View style={{ height: 40 }} />
-      </ScrollView>
-    </SafeAreaView>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {BODY_PARTS.map(part => (
+            <TouchableOpacity
+              key={part.id}
+              style={styles.card}
+              onPress={() => handleSelect(part.id)}
+            >
+              <Text style={styles.cardLabel}>{part.label}</Text>
+              <Text style={styles.arrow}>›</Text>
+            </TouchableOpacity>
+          ))}
+          <View style={{ height: 40 }} />
+        </ScrollView>
+      </SafeAreaView>
+    </>
   );
 }
 
