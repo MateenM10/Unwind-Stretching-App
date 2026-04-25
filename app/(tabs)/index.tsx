@@ -1,98 +1,69 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { useState } from 'react';
+import { SafeAreaView, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+const positions = [
+  { id: 'couch',    label: '🛋️  On the Couch',  desc: 'Seated stretches' },
+  { id: 'standing', label: '🧍 Standing',        desc: 'Upright stretches' },
+  { id: 'lying',    label: '🛏️  Lying Down',     desc: 'Floor stretches' },
+];
 
-export default function HomeScreen() {
+export default function PositionPicker() {
+  const [selected, setSelected] = useState<string[]>([]);
+
+  const toggle = (id: string) => {
+    setSelected(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  };
+
+  const selectAll = () => setSelected(positions.map(p => p.id));
+
+  const isSelected = (id: string) => selected.includes(id);
+  const allSelected = selected.length === positions.length;
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>How do you want to stretch?</Text>
+      <Text style={styles.subtitle}>Pick one or more positions</Text>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      {positions.map(pos => (
+        <TouchableOpacity
+          key={pos.id}
+          style={[styles.card, isSelected(pos.id) && styles.cardSelected]}
+          onPress={() => toggle(pos.id)}
+        >
+          <Text style={styles.cardLabel}>{pos.label}</Text>
+          <Text style={styles.cardDesc}>{pos.desc}</Text>
+        </TouchableOpacity>
+      ))}
+
+      <TouchableOpacity
+        style={[styles.allButton, allSelected && styles.allButtonSelected]}
+        onPress={selectAll}
+      >
+        <Text style={styles.allButtonText}>✦ All 3 Positions</Text>
+      </TouchableOpacity>
+
+      {selected.length > 0 && (
+        <TouchableOpacity style={styles.startButton}>
+          <Text style={styles.startText}>Start Stretching →</Text>
+        </TouchableOpacity>
+      )}
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+  container:          { flex: 1, backgroundColor: '#0f0f0f', padding: 24, justifyContent: 'center' },
+  title:              { fontSize: 28, fontWeight: '700', color: '#fff', marginBottom: 6 },
+  subtitle:           { fontSize: 15, color: '#888', marginBottom: 32 },
+  card:               { backgroundColor: '#1a1a1a', borderRadius: 16, padding: 20, marginBottom: 12, borderWidth: 2, borderColor: 'transparent' },
+  cardSelected:       { borderColor: '#a78bfa' },
+  cardLabel:          { fontSize: 18, fontWeight: '600', color: '#fff' },
+  cardDesc:           { fontSize: 13, color: '#888', marginTop: 4 },
+  allButton:          { borderRadius: 16, padding: 18, marginBottom: 12, borderWidth: 2, borderColor: '#444', alignItems: 'center' },
+  allButtonSelected:  { borderColor: '#a78bfa', backgroundColor: '#1a1a1a' },
+  allButtonText:      { fontSize: 16, fontWeight: '600', color: '#a78bfa' },
+  startButton:        { backgroundColor: '#a78bfa', borderRadius: 16, padding: 18, alignItems: 'center', marginTop: 8 },
+  startText:          { fontSize: 17, fontWeight: '700', color: '#fff' },
 });
