@@ -1,15 +1,26 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import * as Speech from 'expo-speech';
 import { useEffect, useRef, useState } from 'react';
-import { SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, StatusBar, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { recordSession } from '../utils/streaks';
 import { ALL_STRETCHES } from '../utils/stretches';
 import { adjustWeight, getFavourites, getWeights, toggleFavourite, weightedShuffle } from '../utils/weights';
 
+const BREATHING_CYCLE = 8;
+
+const getBreathingCue = (timeLeft: number, totalDuration: number): string => {
+  const elapsed = totalDuration - timeLeft;
+  const phase = elapsed % BREATHING_CYCLE;
+  if (phase < 4) return 'Breathe in...';
+  return 'Breathe out...';
+};
+
 export default function SessionScreen() {
-  const { positions, bodyPart, minutes } = useLocalSearchParams<{
+  const { positions, bodyPart, minutes, feeling } = useLocalSearchParams<{
     positions: string;
     bodyPart: string;
     minutes: string;
+    feeling: string;
   }>();
   const router = useRouter();
 
@@ -18,7 +29,8 @@ export default function SessionScreen() {
   const allFiltered = ALL_STRETCHES.filter(s => {
     const matchesPosition = s.positions.some(p => selectedPositions.includes(p));
     const matchesBodyPart = bodyPart === 'general' || s.muscle === bodyPart;
-    return matchesPosition && matchesBodyPart;
+    const matchesFeeling = !feeling || s.feelings.includes(feeling);
+    return matchesPosition && matchesBodyPart && matchesFeeling;
   });
 
   const filtered = (() => {
@@ -42,11 +54,36 @@ export default function SessionScreen() {
   const [isRunning, setIsRunning] = useState(true);
   const [totalTimeSpent, setTotalTimeSpent] = useState(0);
   const [favourites, setFavourites] = useState<string[]>([]);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastBreathRef = useRef<string>('');
+  const halfwaySpokenRef = useRef(false);
+  const endSpokenRef = useRef(false);
 
   const current = stretches[index];
   const isLast = index === stretches.length - 1;
   const isFavourited = current ? favourites.includes(current.id) : false;
+  const breathingCue = current ? getBreathingCue(timeLeft, current.duration) : '';
+  const isBreathingIn = breathingCue === 'Breathe in...';
+
+  const speak = (text: string) => {
+    if (!voiceEnabled) return;
+    Speech.stop();
+    Speech.speak(text, {
+      rate: 0.9,
+      pitch: 1.0,
+    });
+  };
+
+  // Announce stretch when it starts
+  useEffect(() => {
+    if (!current) return;
+    halfwaySpokenRef.current = false;
+    endSpokenRef.current = false;
+    lastBreathRef.current = '';
+    const msg = `${current.name}. ${current.tip ?? ''}`;
+    speak(msg);
+  }, [index, voiceEnabled]);
 
   useEffect(() => {
     const load = async () => {
@@ -59,19 +96,51 @@ export default function SessionScreen() {
   }, []);
 
   useEffect(() => {
-    if (!isRunning) return;
+    if (!isRunning || !current) return;
     intervalRef.current = setInterval(() => {
       setTimeLeft(t => {
+        const newTime = t <= 1 ? 0 : t - 1;
+
+        // Halfway cue
+        const halfway = Math.floor(current.duration / 2);
+        if (newTime === halfway && !halfwaySpokenRef.current) {
+          halfwaySpokenRef.current = true;
+          speak('Halfway there.');
+        }
+
+        // Last 3 seconds cue
+        if (newTime === 3 && !endSpokenRef.current) {
+          endSpokenRef.current = true;
+          speak(isLast ? 'Almost done. Great work.' : 'Get ready for the next stretch.');
+        }
+
         if (t <= 1) {
           clearInterval(intervalRef.current!);
           return 0;
         }
-        return t - 1;
+        return newTime;
       });
+
       setTotalTimeSpent(t => t + 1);
+
+      // Breathing cues — only speak on phase change
+      setTimeLeft(t => {
+        if (!current) return t;
+        const elapsed = current.duration - t;
+        const phase = elapsed % BREATHING_CYCLE;
+        if (phase === 0 && lastBreathRef.current !== 'in') {
+          lastBreathRef.current = 'in';
+          speak('Breathe in.');
+        } else if (phase === 4 && lastBreathRef.current !== 'out') {
+          lastBreathRef.current = 'out';
+          speak('Breathe out.');
+        }
+        return t;
+      });
+
     }, 1000);
     return () => clearInterval(intervalRef.current!);
-  }, [isRunning, index]);
+  }, [isRunning, index, voiceEnabled]);
 
   const handleFavourite = async () => {
     if (!current) return;
@@ -80,7 +149,14 @@ export default function SessionScreen() {
     setFavourites(updated);
   };
 
+  const toggleVoice = (val: boolean) => {
+    setVoiceEnabled(val);
+    if (!val) Speech.stop();
+    else speak('Voice guidance on.');
+  };
+
   const goNext = async (skipped = false) => {
+    Speech.stop();
     if (current && skipped) {
       await adjustWeight(current.id, 'down');
     }
@@ -125,11 +201,26 @@ export default function SessionScreen() {
       <StatusBar barStyle="dark-content" backgroundColor="#FAF7F2" />
       <SafeAreaView style={styles.container}>
 
-        <View style={styles.progressTrack}>
-          <View style={[styles.progressFill, { width: `${progress}%` }]} />
+        {/* Top row — progress + voice toggle */}
+        <View style={styles.topRow}>
+          <View style={styles.progressTrack}>
+            <View style={[styles.progressFill, { width: `${progress}%` }]} />
+          </View>
+          <View style={styles.voiceToggle}>
+            <Text style={styles.voiceLabel}>{voiceEnabled ? '🔊' : '🔇'}</Text>
+            <Switch
+              value={voiceEnabled}
+              onValueChange={toggleVoice}
+              trackColor={{ false: '#EDE5D8', true: '#C9A96E' }}
+              thumbColor="#FFFFFF"
+              style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
+            />
+          </View>
         </View>
+
         <Text style={styles.counter}>{index + 1} of {stretches.length}</Text>
 
+        {/* Main card */}
         <View style={styles.card}>
           <Text style={styles.muscle}>{current.muscle.toUpperCase()}</Text>
           <Text style={styles.name}>{current.name}</Text>
@@ -146,9 +237,20 @@ export default function SessionScreen() {
             <Text style={styles.timerLabel}>secs</Text>
           </View>
 
+          {isRunning && (
+            <View style={styles.breathingRow}>
+              <Text style={[styles.breathingCue, isBreathingIn ? styles.breatheIn : styles.breatheOut]}>
+                {breathingCue}
+              </Text>
+            </View>
+          )}
+
           <TouchableOpacity
             style={styles.pauseButton}
-            onPress={() => setIsRunning(r => !r)}
+            onPress={() => {
+              if (isRunning) Speech.stop();
+              setIsRunning(r => !r);
+            }}
           >
             <Text style={styles.pauseText}>{isRunning ? '⏸ Pause' : '▶ Resume'}</Text>
           </TouchableOpacity>
@@ -167,7 +269,6 @@ export default function SessionScreen() {
           <TouchableOpacity style={styles.skipButton} onPress={() => goNext(true)}>
             <Text style={styles.skipText}>⏭  Skip</Text>
           </TouchableOpacity>
-
           <TouchableOpacity style={styles.nextButton} onPress={() => goNext(false)}>
             <Text style={styles.nextText}>{isLast ? '🎉  Finish' : 'Next →'}</Text>
           </TouchableOpacity>
@@ -180,8 +281,11 @@ export default function SessionScreen() {
 
 const styles = StyleSheet.create({
   container:       { flex: 1, backgroundColor: '#FAF7F2', padding: 24 },
-  progressTrack:   { height: 4, backgroundColor: '#EDE5D8', borderRadius: 2, marginBottom: 8 },
+  topRow:          { flexDirection: 'row', alignItems: 'center', marginBottom: 8, gap: 12 },
+  progressTrack:   { flex: 1, height: 4, backgroundColor: '#EDE5D8', borderRadius: 2 },
   progressFill:    { height: 4, backgroundColor: '#C9A96E', borderRadius: 2 },
+  voiceToggle:     { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  voiceLabel:      { fontSize: 16 },
   counter:         { color: '#9B8573', fontSize: 13, marginBottom: 20 },
   card:            { backgroundColor: '#FFFFFF', borderRadius: 24, padding: 28, alignItems: 'center', marginBottom: 24, shadowColor: '#C9A96E', shadowOpacity: 0.1, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
   muscle:          { color: '#C9A96E', fontSize: 13, fontWeight: '600', letterSpacing: 1.5, marginBottom: 6 },
@@ -189,9 +293,13 @@ const styles = StyleSheet.create({
   tipBox:          { flexDirection: 'row', backgroundColor: '#FAF7F2', borderRadius: 12, padding: 12, marginBottom: 20, borderWidth: 1, borderColor: '#EDE5D8', alignItems: 'flex-start', gap: 8 },
   tipIcon:         { fontSize: 14 },
   tipText:         { flex: 1, fontSize: 13, color: '#9B8573', lineHeight: 20 },
-  timerCircle:     { width: 110, height: 110, borderRadius: 55, borderWidth: 3, borderColor: '#C9A96E', alignItems: 'center', justifyContent: 'center', marginBottom: 20, backgroundColor: '#FDF8F2' },
+  timerCircle:     { width: 110, height: 110, borderRadius: 55, borderWidth: 3, borderColor: '#C9A96E', alignItems: 'center', justifyContent: 'center', marginBottom: 12, backgroundColor: '#FDF8F2' },
   timerText:       { color: '#2C2416', fontSize: 40, fontWeight: '700' },
   timerLabel:      { color: '#9B8573', fontSize: 12 },
+  breathingRow:    { marginBottom: 16, alignItems: 'center' },
+  breathingCue:    { fontSize: 15, fontWeight: '600', letterSpacing: 0.5 },
+  breatheIn:       { color: '#C9A96E' },
+  breatheOut:      { color: '#9B8573' },
   pauseButton:     { paddingVertical: 10, paddingHorizontal: 24, borderRadius: 20, borderWidth: 1, borderColor: '#EDE5D8', marginBottom: 12 },
   pauseText:       { color: '#9B8573', fontSize: 14 },
   favButton:       { paddingVertical: 10, paddingHorizontal: 24, borderRadius: 20, borderWidth: 1, borderColor: '#EDE5D8' },

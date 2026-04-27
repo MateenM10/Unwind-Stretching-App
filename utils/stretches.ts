@@ -5,6 +5,7 @@ export const ALL_STRETCHES = [
     muscle: 'neck',
     duration: 30,
     positions: ['couch', 'standing'],
+    feelings: ['tight', 'stressed'],
     tip: 'Move slowly and let gravity do the work. Never roll your neck backwards — keep it to the sides and front only.',
   },
   {
@@ -13,6 +14,7 @@ export const ALL_STRETCHES = [
     muscle: 'shoulders',
     duration: 30,
     positions: ['couch', 'standing'],
+    feelings: ['tight', 'stressed', 'low-energy'],
     tip: 'Lift your shoulders up toward your ears, hold for 2 seconds, then drop them down completely. Feel the tension release on the drop.',
   },
   {
@@ -21,6 +23,7 @@ export const ALL_STRETCHES = [
     muscle: 'back',
     duration: 45,
     positions: ['couch'],
+    feelings: ['tight', 'sore'],
     tip: 'Sit tall before you twist — imagine a string pulling the top of your head toward the ceiling. Breathe out as you rotate deeper.',
   },
   {
@@ -29,7 +32,8 @@ export const ALL_STRETCHES = [
     muscle: 'quads',
     duration: 30,
     positions: ['standing'],
-    tip: 'Keep your knees together and stand tall. Use a wall for balance if needed — there\'s no shame in it, it actually helps you stretch deeper.',
+    feelings: ['tight', 'sore'],
+    tip: 'Keep your knees together and stand tall. Use a wall for balance if needed — it actually helps you stretch deeper.',
   },
   {
     id: '5',
@@ -37,6 +41,7 @@ export const ALL_STRETCHES = [
     muscle: 'calves',
     duration: 30,
     positions: ['standing'],
+    feelings: ['low-energy', 'tight'],
     tip: 'Press through the ball of your foot and hold at the top for a full second. Lower slowly — the downward phase is where the stretch happens.',
   },
   {
@@ -45,6 +50,7 @@ export const ALL_STRETCHES = [
     muscle: 'back',
     duration: 45,
     positions: ['lying'],
+    feelings: ['sore', 'stressed'],
     tip: 'Pull both knees gently into your chest and let your lower back press flat into the floor. Rock side to side slightly for a bonus massage.',
   },
   {
@@ -53,6 +59,7 @@ export const ALL_STRETCHES = [
     muscle: 'hips',
     duration: 45,
     positions: ['lying'],
+    feelings: ['tight', 'sore'],
     tip: 'Cross one ankle over the opposite knee and flex that foot to protect your knee joint. The closer you pull your legs to your chest, the deeper the stretch.',
   },
   {
@@ -61,6 +68,7 @@ export const ALL_STRETCHES = [
     muscle: 'chest',
     duration: 30,
     positions: ['couch', 'standing'],
+    feelings: ['stressed', 'low-energy', 'tight'],
     tip: 'Clasp your hands behind your back and gently squeeze your shoulder blades together. Keep your chin level — don\'t let your head drop forward.',
   },
   {
@@ -69,6 +77,7 @@ export const ALL_STRETCHES = [
     muscle: 'ankles',
     duration: 20,
     positions: ['couch', 'lying'],
+    feelings: ['low-energy', 'sore'],
     tip: 'Make the circles as big as possible and go slowly. Do 5 clockwise then 5 counter-clockwise on each foot for the full benefit.',
   },
   {
@@ -77,6 +86,7 @@ export const ALL_STRETCHES = [
     muscle: 'general',
     duration: 45,
     positions: ['lying'],
+    feelings: ['low-energy', 'stressed'],
     tip: 'Reach your arms overhead and point your toes away from you at the same time. Take a deep breath in as you stretch, and release everything on the exhale.',
   },
   {
@@ -85,6 +95,7 @@ export const ALL_STRETCHES = [
     muscle: 'hamstrings',
     duration: 40,
     positions: ['standing', 'lying'],
+    feelings: ['tight', 'sore'],
     tip: 'Keep a soft bend in your knee — never lock it out. Hinge from your hips, not your waist, and let your spine stay long rather than rounding.',
   },
   {
@@ -93,6 +104,7 @@ export const ALL_STRETCHES = [
     muscle: 'hips',
     duration: 40,
     positions: ['standing'],
+    feelings: ['tight', 'low-energy'],
     tip: 'Tuck your pelvis slightly under — this is the key move most people miss. You should feel the stretch at the front of your back leg\'s hip, not your knee.',
   },
 ];

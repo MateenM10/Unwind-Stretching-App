@@ -17,18 +17,12 @@ export default function BodyPartPicker() {
   const { positions } = useLocalSearchParams<{ positions: string }>();
   const router = useRouter();
 
-  const handleSelect = (bodyPart: string) => {
-    router.push({
-      pathname: '/duration',
-      params: { positions, bodyPart },
-    });
+  const handleBodyPart = (bodyPart: string) => {
+    router.push({ pathname: '/duration', params: { positions, bodyPart } });
   };
 
   const handleGeneral = () => {
-    router.push({
-      pathname: '/duration',
-      params: { positions, bodyPart: 'general' },
-    });
+    router.push({ pathname: '/duration', params: { positions, bodyPart: 'general' } });
   };
 
   return (
@@ -50,7 +44,7 @@ export default function BodyPartPicker() {
             <TouchableOpacity
               key={part.id}
               style={styles.card}
-              onPress={() => handleSelect(part.id)}
+              onPress={() => handleBodyPart(part.id)}
             >
               <Text style={styles.cardLabel}>{part.label}</Text>
               <Text style={styles.arrow}>›</Text>
