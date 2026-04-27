@@ -73,7 +73,7 @@ export default function SessionScreen() {
           count: stretches.length.toString(),
           totalTime: totalTimeSpent.toString(),
           streak: streakData.currentStreak.toString(),
-        }
+        },
       });
       return;
     }
@@ -106,20 +106,32 @@ export default function SessionScreen() {
       <StatusBar barStyle="dark-content" backgroundColor="#FAF7F2" />
       <SafeAreaView style={styles.container}>
 
+        {/* Progress bar */}
         <View style={styles.progressTrack}>
           <View style={[styles.progressFill, { width: `${progress}%` }]} />
         </View>
         <Text style={styles.counter}>{index + 1} of {stretches.length}</Text>
 
+        {/* Main card */}
         <View style={styles.card}>
           <Text style={styles.muscle}>{current.muscle.toUpperCase()}</Text>
           <Text style={styles.name}>{current.name}</Text>
 
+          {/* Coaching tip */}
+          {current.tip && (
+            <View style={styles.tipBox}>
+              <Text style={styles.tipIcon}>💡</Text>
+              <Text style={styles.tipText}>{current.tip}</Text>
+            </View>
+          )}
+
+          {/* Timer */}
           <View style={styles.timerCircle}>
             <Text style={styles.timerText}>{timeLeft}</Text>
             <Text style={styles.timerLabel}>secs</Text>
           </View>
 
+          {/* Pause */}
           <TouchableOpacity
             style={styles.pauseButton}
             onPress={() => setIsRunning(r => !r)}
@@ -127,14 +139,18 @@ export default function SessionScreen() {
             <Text style={styles.pauseText}>{isRunning ? '⏸ Pause' : '▶ Resume'}</Text>
           </TouchableOpacity>
 
+          {/* Favourite */}
           <TouchableOpacity
             style={[styles.favButton, isFavourited && styles.favButtonActive]}
             onPress={handleFavourite}
           >
-            <Text style={styles.favText}>{isFavourited ? '❤️  Favourited' : '🤍  Favourite this stretch'}</Text>
+            <Text style={styles.favText}>
+              {isFavourited ? '❤️  Favourited' : '🤍  Favourite this stretch'}
+            </Text>
           </TouchableOpacity>
         </View>
 
+        {/* Skip / Next */}
         <View style={styles.actions}>
           <TouchableOpacity style={styles.skipButton} onPress={() => goNext(true)}>
             <Text style={styles.skipText}>⏭  Skip</Text>
@@ -154,14 +170,17 @@ const styles = StyleSheet.create({
   container:       { flex: 1, backgroundColor: '#FAF7F2', padding: 24 },
   progressTrack:   { height: 4, backgroundColor: '#EDE5D8', borderRadius: 2, marginBottom: 8 },
   progressFill:    { height: 4, backgroundColor: '#C9A96E', borderRadius: 2 },
-  counter:         { color: '#9B8573', fontSize: 13, marginBottom: 32 },
-  card:            { backgroundColor: '#FFFFFF', borderRadius: 24, padding: 32, alignItems: 'center', marginBottom: 32, shadowColor: '#C9A96E', shadowOpacity: 0.1, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
-  muscle:          { color: '#C9A96E', fontSize: 13, fontWeight: '600', letterSpacing: 1.5, marginBottom: 8 },
-  name:            { color: '#2C2416', fontSize: 26, fontWeight: '700', textAlign: 'center', marginBottom: 32 },
-  timerCircle:     { width: 120, height: 120, borderRadius: 60, borderWidth: 3, borderColor: '#C9A96E', alignItems: 'center', justifyContent: 'center', marginBottom: 24, backgroundColor: '#FDF8F2' },
-  timerText:       { color: '#2C2416', fontSize: 42, fontWeight: '700' },
+  counter:         { color: '#9B8573', fontSize: 13, marginBottom: 20 },
+  card:            { backgroundColor: '#FFFFFF', borderRadius: 24, padding: 28, alignItems: 'center', marginBottom: 24, shadowColor: '#C9A96E', shadowOpacity: 0.1, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
+  muscle:          { color: '#C9A96E', fontSize: 13, fontWeight: '600', letterSpacing: 1.5, marginBottom: 6 },
+  name:            { color: '#2C2416', fontSize: 26, fontWeight: '700', textAlign: 'center', marginBottom: 16 },
+  tipBox:          { flexDirection: 'row', backgroundColor: '#FAF7F2', borderRadius: 12, padding: 12, marginBottom: 20, borderWidth: 1, borderColor: '#EDE5D8', alignItems: 'flex-start', gap: 8 },
+  tipIcon:         { fontSize: 14 },
+  tipText:         { flex: 1, fontSize: 13, color: '#9B8573', lineHeight: 20 },
+  timerCircle:     { width: 110, height: 110, borderRadius: 55, borderWidth: 3, borderColor: '#C9A96E', alignItems: 'center', justifyContent: 'center', marginBottom: 20, backgroundColor: '#FDF8F2' },
+  timerText:       { color: '#2C2416', fontSize: 40, fontWeight: '700' },
   timerLabel:      { color: '#9B8573', fontSize: 12 },
-  pauseButton:     { paddingVertical: 10, paddingHorizontal: 24, borderRadius: 20, borderWidth: 1, borderColor: '#EDE5D8', marginBottom: 16 },
+  pauseButton:     { paddingVertical: 10, paddingHorizontal: 24, borderRadius: 20, borderWidth: 1, borderColor: '#EDE5D8', marginBottom: 12 },
   pauseText:       { color: '#9B8573', fontSize: 14 },
   favButton:       { paddingVertical: 10, paddingHorizontal: 24, borderRadius: 20, borderWidth: 1, borderColor: '#EDE5D8' },
   favButtonActive: { borderColor: '#C9A96E', backgroundColor: '#FDF8F2' },
