@@ -1,6 +1,7 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { recordSession } from '../utils/streaks';
 import { ALL_STRETCHES } from '../utils/stretches';
 import { adjustWeight, getFavourites, getWeights, toggleFavourite, weightedShuffle } from '../utils/weights';
 
@@ -28,7 +29,6 @@ export default function SessionScreen() {
   const isLast = index === stretches.length - 1;
   const isFavourited = current ? favourites.includes(current.id) : false;
 
-  // Load weights + favourites and shuffle on mount
   useEffect(() => {
     const load = async () => {
       const weights = await getWeights();
@@ -66,12 +66,16 @@ export default function SessionScreen() {
       await adjustWeight(current.id, 'down');
     }
     if (isLast) {
+      const streakData = await recordSession(
+        totalTimeSpent,
+        selectedPositions.join(',')
+      );
       router.replace({
         pathname: '/complete',
         params: {
           count: stretches.length.toString(),
           totalTime: totalTimeSpent.toString(),
-          streak: '1',
+          streak: streakData.currentStreak.toString(),
         }
       });
       return;
@@ -126,7 +130,6 @@ export default function SessionScreen() {
             <Text style={styles.pauseText}>{isRunning ? '⏸ Pause' : '▶ Resume'}</Text>
           </TouchableOpacity>
 
-          {/* Favourite button inside card */}
           <TouchableOpacity
             style={[styles.favButton, isFavourited && styles.favButtonActive]}
             onPress={handleFavourite}
@@ -151,25 +154,25 @@ export default function SessionScreen() {
 }
 
 const styles = StyleSheet.create({
-  container:      { flex: 1, backgroundColor: '#0f0f0f', padding: 24 },
-  progressTrack:  { height: 4, backgroundColor: '#2a2a2a', borderRadius: 2, marginBottom: 8 },
-  progressFill:   { height: 4, backgroundColor: '#a78bfa', borderRadius: 2 },
-  counter:        { color: '#888', fontSize: 13, marginBottom: 32 },
-  card:           { backgroundColor: '#1a1a1a', borderRadius: 24, padding: 32, alignItems: 'center', marginBottom: 32 },
-  muscle:         { color: '#a78bfa', fontSize: 13, fontWeight: '600', letterSpacing: 1.5, marginBottom: 8 },
-  name:           { color: '#fff', fontSize: 26, fontWeight: '700', textAlign: 'center', marginBottom: 32 },
-  timerCircle:    { width: 120, height: 120, borderRadius: 60, borderWidth: 3, borderColor: '#a78bfa', alignItems: 'center', justifyContent: 'center', marginBottom: 24 },
-  timerText:      { color: '#fff', fontSize: 42, fontWeight: '700' },
-  timerLabel:     { color: '#888', fontSize: 12 },
-  pauseButton:    { paddingVertical: 10, paddingHorizontal: 24, borderRadius: 20, borderWidth: 1, borderColor: '#444', marginBottom: 16 },
-  pauseText:      { color: '#ccc', fontSize: 14 },
-  favButton:      { paddingVertical: 10, paddingHorizontal: 24, borderRadius: 20, borderWidth: 1, borderColor: '#444' },
-  favButtonActive:{ borderColor: '#a78bfa', backgroundColor: '#2a1a3a' },
-  favText:        { color: '#ccc', fontSize: 14 },
-  actions:        { flexDirection: 'row', gap: 12 },
-  skipButton:     { flex: 1, backgroundColor: '#1a1a1a', borderRadius: 16, padding: 18, alignItems: 'center' },
-  skipText:       { color: '#888', fontSize: 15, fontWeight: '600' },
-  nextButton:     { flex: 1, backgroundColor: '#a78bfa', borderRadius: 16, padding: 18, alignItems: 'center' },
-  nextText:       { color: '#fff', fontSize: 15, fontWeight: '700' },
-  emptyText:      { color: '#888', fontSize: 16, textAlign: 'center', marginBottom: 24, marginTop: 40 },
+  container:       { flex: 1, backgroundColor: '#0f0f0f', padding: 24 },
+  progressTrack:   { height: 4, backgroundColor: '#2a2a2a', borderRadius: 2, marginBottom: 8 },
+  progressFill:    { height: 4, backgroundColor: '#a78bfa', borderRadius: 2 },
+  counter:         { color: '#888', fontSize: 13, marginBottom: 32 },
+  card:            { backgroundColor: '#1a1a1a', borderRadius: 24, padding: 32, alignItems: 'center', marginBottom: 32 },
+  muscle:          { color: '#a78bfa', fontSize: 13, fontWeight: '600', letterSpacing: 1.5, marginBottom: 8 },
+  name:            { color: '#fff', fontSize: 26, fontWeight: '700', textAlign: 'center', marginBottom: 32 },
+  timerCircle:     { width: 120, height: 120, borderRadius: 60, borderWidth: 3, borderColor: '#a78bfa', alignItems: 'center', justifyContent: 'center', marginBottom: 24 },
+  timerText:       { color: '#fff', fontSize: 42, fontWeight: '700' },
+  timerLabel:      { color: '#888', fontSize: 12 },
+  pauseButton:     { paddingVertical: 10, paddingHorizontal: 24, borderRadius: 20, borderWidth: 1, borderColor: '#444', marginBottom: 16 },
+  pauseText:       { color: '#ccc', fontSize: 14 },
+  favButton:       { paddingVertical: 10, paddingHorizontal: 24, borderRadius: 20, borderWidth: 1, borderColor: '#444' },
+  favButtonActive: { borderColor: '#a78bfa', backgroundColor: '#2a1a3a' },
+  favText:         { color: '#ccc', fontSize: 14 },
+  actions:         { flexDirection: 'row', gap: 12 },
+  skipButton:      { flex: 1, backgroundColor: '#1a1a1a', borderRadius: 16, padding: 18, alignItems: 'center' },
+  skipText:        { color: '#888', fontSize: 15, fontWeight: '600' },
+  nextButton:      { flex: 1, backgroundColor: '#a78bfa', borderRadius: 16, padding: 18, alignItems: 'center' },
+  nextText:        { color: '#fff', fontSize: 15, fontWeight: '700' },
+  emptyText:       { color: '#888', fontSize: 16, textAlign: 'center', marginBottom: 24, marginTop: 40 },
 });
