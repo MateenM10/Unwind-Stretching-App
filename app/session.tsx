@@ -1,21 +1,8 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
-const ALL_STRETCHES = [
-  { id: '1',  name: 'Neck Rolls',          muscle: 'neck',       duration: 30, positions: ['couch', 'standing'] },
-  { id: '2',  name: 'Shoulder Shrugs',     muscle: 'shoulders',  duration: 30, positions: ['couch', 'standing'] },
-  { id: '3',  name: 'Seated Spinal Twist', muscle: 'back',       duration: 45, positions: ['couch'] },
-  { id: '4',  name: 'Standing Quad Hold',  muscle: 'quads',      duration: 30, positions: ['standing'] },
-  { id: '5',  name: 'Standing Calf Raise', muscle: 'calves',     duration: 30, positions: ['standing'] },
-  { id: '6',  name: 'Supine Knee Hug',     muscle: 'back',       duration: 45, positions: ['lying'] },
-  { id: '7',  name: 'Lying Hip Stretch',   muscle: 'hips',       duration: 45, positions: ['lying'] },
-  { id: '8',  name: 'Chest Opener',        muscle: 'chest',      duration: 30, positions: ['couch', 'standing'] },
-  { id: '9',  name: 'Ankle Circles',       muscle: 'ankles',     duration: 20, positions: ['couch', 'lying'] },
-  { id: '10', name: 'Full Body Stretch',   muscle: 'general',    duration: 45, positions: ['lying'] },
-  { id: '11', name: 'Hamstring Reach',     muscle: 'hamstrings', duration: 40, positions: ['standing', 'lying'] },
-  { id: '12', name: 'Hip Flexor Lunge',    muscle: 'hips',       duration: 40, positions: ['standing'] },
-];
+import { ALL_STRETCHES } from '../utils/stretches';
+import { adjustWeight, getFavourites, getWeights, toggleFavourite, weightedShuffle } from '../utils/weights';
 
 export default function SessionScreen() {
   const { positions, bodyPart } = useLocalSearchParams<{ positions: string; bodyPart: string }>();
@@ -23,20 +10,34 @@ export default function SessionScreen() {
 
   const selectedPositions = positions?.split(',') ?? [];
 
-  const stretches = ALL_STRETCHES.filter(s => {
+  const filtered = ALL_STRETCHES.filter(s => {
     const matchesPosition = s.positions.some(p => selectedPositions.includes(p));
     const matchesBodyPart = bodyPart === 'general' || s.muscle === bodyPart;
     return matchesPosition && matchesBodyPart;
   });
 
+  const [stretches, setStretches] = useState(filtered);
   const [index, setIndex] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(stretches[0]?.duration ?? 30);
+  const [timeLeft, setTimeLeft] = useState(filtered[0]?.duration ?? 30);
   const [isRunning, setIsRunning] = useState(true);
   const [totalTimeSpent, setTotalTimeSpent] = useState(0);
+  const [favourites, setFavourites] = useState<string[]>([]);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const current = stretches[index];
   const isLast = index === stretches.length - 1;
+  const isFavourited = current ? favourites.includes(current.id) : false;
+
+  // Load weights + favourites and shuffle on mount
+  useEffect(() => {
+    const load = async () => {
+      const weights = await getWeights();
+      const favs = await getFavourites();
+      setFavourites(favs);
+      setStretches(weightedShuffle(filtered, weights));
+    };
+    load();
+  }, []);
 
   useEffect(() => {
     if (!isRunning) return;
@@ -53,7 +54,17 @@ export default function SessionScreen() {
     return () => clearInterval(intervalRef.current!);
   }, [isRunning, index]);
 
-  const goNext = () => {
+  const handleFavourite = async () => {
+    if (!current) return;
+    const updated = await toggleFavourite(current.id);
+    await adjustWeight(current.id, 'up');
+    setFavourites(updated);
+  };
+
+  const goNext = async (skipped = false) => {
+    if (current && skipped) {
+      await adjustWeight(current.id, 'down');
+    }
     if (isLast) {
       router.replace({
         pathname: '/complete',
@@ -114,14 +125,22 @@ export default function SessionScreen() {
           >
             <Text style={styles.pauseText}>{isRunning ? '⏸ Pause' : '▶ Resume'}</Text>
           </TouchableOpacity>
+
+          {/* Favourite button inside card */}
+          <TouchableOpacity
+            style={[styles.favButton, isFavourited && styles.favButtonActive]}
+            onPress={handleFavourite}
+          >
+            <Text style={styles.favText}>{isFavourited ? '❤️  Favourited' : '🤍  Favourite this stretch'}</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.actions}>
-          <TouchableOpacity style={styles.skipButton} onPress={goNext}>
+          <TouchableOpacity style={styles.skipButton} onPress={() => goNext(true)}>
             <Text style={styles.skipText}>⏭  Skip</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.nextButton} onPress={goNext}>
+          <TouchableOpacity style={styles.nextButton} onPress={() => goNext(false)}>
             <Text style={styles.nextText}>{isLast ? '🎉  Finish' : 'Next →'}</Text>
           </TouchableOpacity>
         </View>
@@ -132,22 +151,25 @@ export default function SessionScreen() {
 }
 
 const styles = StyleSheet.create({
-  container:     { flex: 1, backgroundColor: '#0f0f0f', padding: 24 },
-  progressTrack: { height: 4, backgroundColor: '#2a2a2a', borderRadius: 2, marginBottom: 8 },
-  progressFill:  { height: 4, backgroundColor: '#a78bfa', borderRadius: 2 },
-  counter:       { color: '#888', fontSize: 13, marginBottom: 32 },
-  card:          { backgroundColor: '#1a1a1a', borderRadius: 24, padding: 32, alignItems: 'center', marginBottom: 32 },
-  muscle:        { color: '#a78bfa', fontSize: 13, fontWeight: '600', letterSpacing: 1.5, marginBottom: 8 },
-  name:          { color: '#fff', fontSize: 26, fontWeight: '700', textAlign: 'center', marginBottom: 32 },
-  timerCircle:   { width: 120, height: 120, borderRadius: 60, borderWidth: 3, borderColor: '#a78bfa', alignItems: 'center', justifyContent: 'center', marginBottom: 24 },
-  timerText:     { color: '#fff', fontSize: 42, fontWeight: '700' },
-  timerLabel:    { color: '#888', fontSize: 12 },
-  pauseButton:   { paddingVertical: 10, paddingHorizontal: 24, borderRadius: 20, borderWidth: 1, borderColor: '#444' },
-  pauseText:     { color: '#ccc', fontSize: 14 },
-  actions:       { flexDirection: 'row', gap: 12 },
-  skipButton:    { flex: 1, backgroundColor: '#1a1a1a', borderRadius: 16, padding: 18, alignItems: 'center' },
-  skipText:      { color: '#888', fontSize: 15, fontWeight: '600' },
-  nextButton:    { flex: 1, backgroundColor: '#a78bfa', borderRadius: 16, padding: 18, alignItems: 'center' },
-  nextText:      { color: '#fff', fontSize: 15, fontWeight: '700' },
-  emptyText:     { color: '#888', fontSize: 16, textAlign: 'center', marginBottom: 24, marginTop: 40 },
+  container:      { flex: 1, backgroundColor: '#0f0f0f', padding: 24 },
+  progressTrack:  { height: 4, backgroundColor: '#2a2a2a', borderRadius: 2, marginBottom: 8 },
+  progressFill:   { height: 4, backgroundColor: '#a78bfa', borderRadius: 2 },
+  counter:        { color: '#888', fontSize: 13, marginBottom: 32 },
+  card:           { backgroundColor: '#1a1a1a', borderRadius: 24, padding: 32, alignItems: 'center', marginBottom: 32 },
+  muscle:         { color: '#a78bfa', fontSize: 13, fontWeight: '600', letterSpacing: 1.5, marginBottom: 8 },
+  name:           { color: '#fff', fontSize: 26, fontWeight: '700', textAlign: 'center', marginBottom: 32 },
+  timerCircle:    { width: 120, height: 120, borderRadius: 60, borderWidth: 3, borderColor: '#a78bfa', alignItems: 'center', justifyContent: 'center', marginBottom: 24 },
+  timerText:      { color: '#fff', fontSize: 42, fontWeight: '700' },
+  timerLabel:     { color: '#888', fontSize: 12 },
+  pauseButton:    { paddingVertical: 10, paddingHorizontal: 24, borderRadius: 20, borderWidth: 1, borderColor: '#444', marginBottom: 16 },
+  pauseText:      { color: '#ccc', fontSize: 14 },
+  favButton:      { paddingVertical: 10, paddingHorizontal: 24, borderRadius: 20, borderWidth: 1, borderColor: '#444' },
+  favButtonActive:{ borderColor: '#a78bfa', backgroundColor: '#2a1a3a' },
+  favText:        { color: '#ccc', fontSize: 14 },
+  actions:        { flexDirection: 'row', gap: 12 },
+  skipButton:     { flex: 1, backgroundColor: '#1a1a1a', borderRadius: 16, padding: 18, alignItems: 'center' },
+  skipText:       { color: '#888', fontSize: 15, fontWeight: '600' },
+  nextButton:     { flex: 1, backgroundColor: '#a78bfa', borderRadius: 16, padding: 18, alignItems: 'center' },
+  nextText:       { color: '#fff', fontSize: 15, fontWeight: '700' },
+  emptyText:      { color: '#888', fontSize: 16, textAlign: 'center', marginBottom: 24, marginTop: 40 },
 });
