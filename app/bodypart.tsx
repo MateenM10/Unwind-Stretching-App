@@ -18,11 +18,17 @@ export default function BodyPartPicker() {
   const router = useRouter();
 
   const handleSelect = (bodyPart: string) => {
-    router.push({ pathname: '/session', params: { positions, bodyPart } });
+    router.push({
+      pathname: '/duration',
+      params: { positions, bodyPart },
+    });
   };
 
   const handleGeneral = () => {
-    router.push({ pathname: '/session', params: { positions, bodyPart: 'general' } });
+    router.push({
+      pathname: '/duration',
+      params: { positions, bodyPart: 'general' },
+    });
   };
 
   return (

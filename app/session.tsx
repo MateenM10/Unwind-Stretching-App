@@ -6,16 +6,35 @@ import { ALL_STRETCHES } from '../utils/stretches';
 import { adjustWeight, getFavourites, getWeights, toggleFavourite, weightedShuffle } from '../utils/weights';
 
 export default function SessionScreen() {
-  const { positions, bodyPart } = useLocalSearchParams<{ positions: string; bodyPart: string }>();
+  const { positions, bodyPart, minutes } = useLocalSearchParams<{
+    positions: string;
+    bodyPart: string;
+    minutes: string;
+  }>();
   const router = useRouter();
 
   const selectedPositions = positions?.split(',') ?? [];
 
-  const filtered = ALL_STRETCHES.filter(s => {
+  const allFiltered = ALL_STRETCHES.filter(s => {
     const matchesPosition = s.positions.some(p => selectedPositions.includes(p));
     const matchesBodyPart = bodyPart === 'general' || s.muscle === bodyPart;
     return matchesPosition && matchesBodyPart;
   });
+
+  const filtered = (() => {
+    const mins = parseInt(minutes ?? '0');
+    if (mins === 0) return allFiltered;
+    let total = 0;
+    const result = [];
+    for (const s of allFiltered) {
+      if (total + s.duration <= mins * 60) {
+        result.push(s);
+        total += s.duration;
+      }
+      if (total >= mins * 60) break;
+    }
+    return result.length > 0 ? result : allFiltered.slice(0, 2);
+  })();
 
   const [stretches, setStretches] = useState(filtered);
   const [index, setIndex] = useState(0);
@@ -106,18 +125,15 @@ export default function SessionScreen() {
       <StatusBar barStyle="dark-content" backgroundColor="#FAF7F2" />
       <SafeAreaView style={styles.container}>
 
-        {/* Progress bar */}
         <View style={styles.progressTrack}>
           <View style={[styles.progressFill, { width: `${progress}%` }]} />
         </View>
         <Text style={styles.counter}>{index + 1} of {stretches.length}</Text>
 
-        {/* Main card */}
         <View style={styles.card}>
           <Text style={styles.muscle}>{current.muscle.toUpperCase()}</Text>
           <Text style={styles.name}>{current.name}</Text>
 
-          {/* Coaching tip */}
           {current.tip && (
             <View style={styles.tipBox}>
               <Text style={styles.tipIcon}>💡</Text>
@@ -125,13 +141,11 @@ export default function SessionScreen() {
             </View>
           )}
 
-          {/* Timer */}
           <View style={styles.timerCircle}>
             <Text style={styles.timerText}>{timeLeft}</Text>
             <Text style={styles.timerLabel}>secs</Text>
           </View>
 
-          {/* Pause */}
           <TouchableOpacity
             style={styles.pauseButton}
             onPress={() => setIsRunning(r => !r)}
@@ -139,7 +153,6 @@ export default function SessionScreen() {
             <Text style={styles.pauseText}>{isRunning ? '⏸ Pause' : '▶ Resume'}</Text>
           </TouchableOpacity>
 
-          {/* Favourite */}
           <TouchableOpacity
             style={[styles.favButton, isFavourited && styles.favButtonActive]}
             onPress={handleFavourite}
@@ -150,7 +163,6 @@ export default function SessionScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Skip / Next */}
         <View style={styles.actions}>
           <TouchableOpacity style={styles.skipButton} onPress={() => goNext(true)}>
             <Text style={styles.skipText}>⏭  Skip</Text>
