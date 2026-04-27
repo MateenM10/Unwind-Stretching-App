@@ -39,31 +39,25 @@ export default function ProgressScreen() {
 
   return (
     <>
-      <StatusBar barStyle="light-content" backgroundColor="#0f0f0f" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FAF7F2" />
       <SafeAreaView style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <Text style={styles.title}>Your Progress</Text>
           <Text style={styles.subtitle}>Keep showing up</Text>
 
-          {/* Streak hero */}
           <View style={styles.streakCard}>
-            <Text style={styles.streakEmoji}>
-              {getStreakEmoji(data?.currentStreak ?? 0)}
-            </Text>
+            <Text style={styles.streakEmoji}>{getStreakEmoji(data?.currentStreak ?? 0)}</Text>
             <Text style={styles.streakNumber}>{data?.currentStreak ?? 0}</Text>
             <Text style={styles.streakLabel}>Day Streak</Text>
           </View>
 
-          {/* Stats grid */}
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
               <Text style={styles.statNumber}>{data?.totalSessions ?? 0}</Text>
               <Text style={styles.statLabel}>Sessions</Text>
             </View>
             <View style={styles.statCard}>
-              <Text style={styles.statNumber}>
-                {formatTime(data?.totalTimeSeconds ?? 0)}
-              </Text>
+              <Text style={styles.statNumber}>{formatTime(data?.totalTimeSeconds ?? 0)}</Text>
               <Text style={styles.statLabel}>Total Time</Text>
             </View>
             <View style={styles.statCard}>
@@ -72,33 +66,21 @@ export default function ProgressScreen() {
             </View>
           </View>
 
-          {/* Weekly bar chart */}
           <View style={styles.chartCard}>
             <Text style={styles.chartTitle}>This Week</Text>
             <View style={styles.chartRow}>
               {weekly.map((count, i) => (
                 <View key={i} style={styles.barColumn}>
                   <View style={styles.barTrack}>
-                    <View
-                      style={[
-                        styles.barFill,
-                        {
-                          height: `${(count / maxBar) * 100}%`,
-                          backgroundColor: count > 0 ? '#a78bfa' : '#2a2a2a',
-                        },
-                      ]}
-                    />
+                    <View style={[styles.barFill, { height: `${(count / maxBar) * 100}%`, backgroundColor: count > 0 ? '#C9A96E' : '#EDE5D8' }]} />
                   </View>
                   <Text style={styles.barLabel}>{DAY_LABELS[i]}</Text>
-                  {count > 0 && (
-                    <Text style={styles.barCount}>{count}</Text>
-                  )}
+                  {count > 0 && <Text style={styles.barCount}>{count}</Text>}
                 </View>
               ))}
             </View>
           </View>
 
-          {/* Milestones */}
           <View style={styles.milestonesCard}>
             <Text style={styles.chartTitle}>Milestones</Text>
             {[
@@ -111,9 +93,7 @@ export default function ProgressScreen() {
               return (
                 <View key={m.days} style={[styles.milestone, reached && styles.milestoneReached]}>
                   <Text style={styles.milestoneEmoji}>{m.emoji}</Text>
-                  <Text style={[styles.milestoneLabel, reached && styles.milestoneLabelReached]}>
-                    {m.label}
-                  </Text>
+                  <Text style={[styles.milestoneLabel, reached && styles.milestoneLabelReached]}>{m.label}</Text>
                   {reached && <Text style={styles.milestoneTick}>✓</Text>}
                 </View>
               );
@@ -128,30 +108,30 @@ export default function ProgressScreen() {
 }
 
 const styles = StyleSheet.create({
-  container:            { flex: 1, backgroundColor: '#0f0f0f', padding: 24 },
-  title:                { fontSize: 28, fontWeight: '700', color: '#fff', marginBottom: 6 },
-  subtitle:             { fontSize: 15, color: '#888', marginBottom: 24 },
-  streakCard:           { backgroundColor: '#1a1a1a', borderRadius: 24, padding: 32, alignItems: 'center', marginBottom: 16, borderWidth: 2, borderColor: '#a78bfa' },
-  streakEmoji:          { fontSize: 48, marginBottom: 8 },
-  streakNumber:         { fontSize: 64, fontWeight: '700', color: '#fff', lineHeight: 70 },
-  streakLabel:          { fontSize: 16, color: '#888', marginTop: 4 },
-  statsGrid:            { flexDirection: 'row', gap: 10, marginBottom: 16 },
-  statCard:             { flex: 1, backgroundColor: '#1a1a1a', borderRadius: 16, padding: 18, alignItems: 'center' },
-  statNumber:           { fontSize: 22, fontWeight: '700', color: '#fff', marginBottom: 4 },
-  statLabel:            { fontSize: 12, color: '#888' },
-  chartCard:            { backgroundColor: '#1a1a1a', borderRadius: 20, padding: 20, marginBottom: 16 },
-  chartTitle:           { color: '#fff', fontSize: 16, fontWeight: '600', marginBottom: 16 },
-  chartRow:             { flexDirection: 'row', justifyContent: 'space-between', height: 100, alignItems: 'flex-end' },
-  barColumn:            { alignItems: 'center', flex: 1 },
-  barTrack:             { width: 24, height: 80, backgroundColor: '#2a2a2a', borderRadius: 6, justifyContent: 'flex-end', marginBottom: 6, overflow: 'hidden' },
-  barFill:              { width: '100%', borderRadius: 6, minHeight: 4 },
-  barLabel:             { color: '#555', fontSize: 10 },
-  barCount:             { color: '#a78bfa', fontSize: 10, fontWeight: '700' },
-  milestonesCard:       { backgroundColor: '#1a1a1a', borderRadius: 20, padding: 20 },
-  milestone:            { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#2a2a2a', opacity: 0.4 },
-  milestoneReached:     { opacity: 1 },
-  milestoneEmoji:       { fontSize: 20, marginRight: 12 },
-  milestoneLabel:       { color: '#888', fontSize: 15, flex: 1 },
-  milestoneLabelReached:{ color: '#fff' },
-  milestoneTick:        { color: '#a78bfa', fontSize: 16, fontWeight: '700' },
+  container:             { flex: 1, backgroundColor: '#FAF7F2', padding: 24 },
+  title:                 { fontSize: 28, fontWeight: '700', color: '#2C2416', marginBottom: 6 },
+  subtitle:              { fontSize: 15, color: '#9B8573', marginBottom: 24 },
+  streakCard:            { backgroundColor: '#FFFFFF', borderRadius: 24, padding: 32, alignItems: 'center', marginBottom: 16, borderWidth: 2, borderColor: '#C9A96E', shadowColor: '#C9A96E', shadowOpacity: 0.15, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
+  streakEmoji:           { fontSize: 48, marginBottom: 8 },
+  streakNumber:          { fontSize: 64, fontWeight: '700', color: '#2C2416', lineHeight: 70 },
+  streakLabel:           { fontSize: 16, color: '#9B8573', marginTop: 4 },
+  statsGrid:             { flexDirection: 'row', gap: 10, marginBottom: 16 },
+  statCard:              { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 18, alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, shadowOffset: { width: 0, height: 1 }, elevation: 1 },
+  statNumber:            { fontSize: 22, fontWeight: '700', color: '#2C2416', marginBottom: 4 },
+  statLabel:             { fontSize: 12, color: '#9B8573' },
+  chartCard:             { backgroundColor: '#FFFFFF', borderRadius: 20, padding: 20, marginBottom: 16, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, shadowOffset: { width: 0, height: 1 }, elevation: 1 },
+  chartTitle:            { color: '#2C2416', fontSize: 16, fontWeight: '600', marginBottom: 16 },
+  chartRow:              { flexDirection: 'row', justifyContent: 'space-between', height: 100, alignItems: 'flex-end' },
+  barColumn:             { alignItems: 'center', flex: 1 },
+  barTrack:              { width: 24, height: 80, backgroundColor: '#EDE5D8', borderRadius: 6, justifyContent: 'flex-end', marginBottom: 6, overflow: 'hidden' },
+  barFill:               { width: '100%', borderRadius: 6, minHeight: 4 },
+  barLabel:              { color: '#C4B5A5', fontSize: 10 },
+  barCount:              { color: '#C9A96E', fontSize: 10, fontWeight: '700' },
+  milestonesCard:        { backgroundColor: '#FFFFFF', borderRadius: 20, padding: 20, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, shadowOffset: { width: 0, height: 1 }, elevation: 1 },
+  milestone:             { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#F5EFE6', opacity: 0.4 },
+  milestoneReached:      { opacity: 1 },
+  milestoneEmoji:        { fontSize: 20, marginRight: 12 },
+  milestoneLabel:        { color: '#9B8573', fontSize: 15, flex: 1 },
+  milestoneLabelReached: { color: '#2C2416' },
+  milestoneTick:         { color: '#C9A96E', fontSize: 16, fontWeight: '700' },
 });

@@ -66,10 +66,7 @@ export default function SessionScreen() {
       await adjustWeight(current.id, 'down');
     }
     if (isLast) {
-      const streakData = await recordSession(
-        totalTimeSpent,
-        selectedPositions.join(',')
-      );
+      const streakData = await recordSession(totalTimeSpent, selectedPositions.join(','));
       router.replace({
         pathname: '/complete',
         params: {
@@ -90,10 +87,10 @@ export default function SessionScreen() {
     return (
       <>
         <Stack.Screen options={{ headerShown: false }} />
-        <StatusBar barStyle="light-content" backgroundColor="#0f0f0f" />
+        <StatusBar barStyle="dark-content" backgroundColor="#FAF7F2" />
         <SafeAreaView style={styles.container}>
           <Text style={styles.emptyText}>No stretches found for this combination.</Text>
-          <TouchableOpacity style={styles.nextButton} onPress={() => router.replace('/')}>
+          <TouchableOpacity style={styles.nextButton} onPress={() => router.replace('/' as any)}>
             <Text style={styles.nextText}>Go Back</Text>
           </TouchableOpacity>
         </SafeAreaView>
@@ -106,7 +103,7 @@ export default function SessionScreen() {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <StatusBar barStyle="light-content" backgroundColor="#0f0f0f" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FAF7F2" />
       <SafeAreaView style={styles.container}>
 
         <View style={styles.progressTrack}>
@@ -154,25 +151,25 @@ export default function SessionScreen() {
 }
 
 const styles = StyleSheet.create({
-  container:       { flex: 1, backgroundColor: '#0f0f0f', padding: 24 },
-  progressTrack:   { height: 4, backgroundColor: '#2a2a2a', borderRadius: 2, marginBottom: 8 },
-  progressFill:    { height: 4, backgroundColor: '#a78bfa', borderRadius: 2 },
-  counter:         { color: '#888', fontSize: 13, marginBottom: 32 },
-  card:            { backgroundColor: '#1a1a1a', borderRadius: 24, padding: 32, alignItems: 'center', marginBottom: 32 },
-  muscle:          { color: '#a78bfa', fontSize: 13, fontWeight: '600', letterSpacing: 1.5, marginBottom: 8 },
-  name:            { color: '#fff', fontSize: 26, fontWeight: '700', textAlign: 'center', marginBottom: 32 },
-  timerCircle:     { width: 120, height: 120, borderRadius: 60, borderWidth: 3, borderColor: '#a78bfa', alignItems: 'center', justifyContent: 'center', marginBottom: 24 },
-  timerText:       { color: '#fff', fontSize: 42, fontWeight: '700' },
-  timerLabel:      { color: '#888', fontSize: 12 },
-  pauseButton:     { paddingVertical: 10, paddingHorizontal: 24, borderRadius: 20, borderWidth: 1, borderColor: '#444', marginBottom: 16 },
-  pauseText:       { color: '#ccc', fontSize: 14 },
-  favButton:       { paddingVertical: 10, paddingHorizontal: 24, borderRadius: 20, borderWidth: 1, borderColor: '#444' },
-  favButtonActive: { borderColor: '#a78bfa', backgroundColor: '#2a1a3a' },
-  favText:         { color: '#ccc', fontSize: 14 },
+  container:       { flex: 1, backgroundColor: '#FAF7F2', padding: 24 },
+  progressTrack:   { height: 4, backgroundColor: '#EDE5D8', borderRadius: 2, marginBottom: 8 },
+  progressFill:    { height: 4, backgroundColor: '#C9A96E', borderRadius: 2 },
+  counter:         { color: '#9B8573', fontSize: 13, marginBottom: 32 },
+  card:            { backgroundColor: '#FFFFFF', borderRadius: 24, padding: 32, alignItems: 'center', marginBottom: 32, shadowColor: '#C9A96E', shadowOpacity: 0.1, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
+  muscle:          { color: '#C9A96E', fontSize: 13, fontWeight: '600', letterSpacing: 1.5, marginBottom: 8 },
+  name:            { color: '#2C2416', fontSize: 26, fontWeight: '700', textAlign: 'center', marginBottom: 32 },
+  timerCircle:     { width: 120, height: 120, borderRadius: 60, borderWidth: 3, borderColor: '#C9A96E', alignItems: 'center', justifyContent: 'center', marginBottom: 24, backgroundColor: '#FDF8F2' },
+  timerText:       { color: '#2C2416', fontSize: 42, fontWeight: '700' },
+  timerLabel:      { color: '#9B8573', fontSize: 12 },
+  pauseButton:     { paddingVertical: 10, paddingHorizontal: 24, borderRadius: 20, borderWidth: 1, borderColor: '#EDE5D8', marginBottom: 16 },
+  pauseText:       { color: '#9B8573', fontSize: 14 },
+  favButton:       { paddingVertical: 10, paddingHorizontal: 24, borderRadius: 20, borderWidth: 1, borderColor: '#EDE5D8' },
+  favButtonActive: { borderColor: '#C9A96E', backgroundColor: '#FDF8F2' },
+  favText:         { color: '#9B8573', fontSize: 14 },
   actions:         { flexDirection: 'row', gap: 12 },
-  skipButton:      { flex: 1, backgroundColor: '#1a1a1a', borderRadius: 16, padding: 18, alignItems: 'center' },
-  skipText:        { color: '#888', fontSize: 15, fontWeight: '600' },
-  nextButton:      { flex: 1, backgroundColor: '#a78bfa', borderRadius: 16, padding: 18, alignItems: 'center' },
-  nextText:        { color: '#fff', fontSize: 15, fontWeight: '700' },
-  emptyText:       { color: '#888', fontSize: 16, textAlign: 'center', marginBottom: 24, marginTop: 40 },
+  skipButton:      { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 18, alignItems: 'center', borderWidth: 1, borderColor: '#EDE5D8' },
+  skipText:        { color: '#9B8573', fontSize: 15, fontWeight: '600' },
+  nextButton:      { flex: 1, backgroundColor: '#C9A96E', borderRadius: 16, padding: 18, alignItems: 'center' },
+  nextText:        { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
+  emptyText:       { color: '#9B8573', fontSize: 16, textAlign: 'center', marginBottom: 24, marginTop: 40 },
 });
