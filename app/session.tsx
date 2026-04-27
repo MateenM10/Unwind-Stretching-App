@@ -25,10 +25,11 @@ export default function SessionScreen() {
   const router = useRouter();
 
   const selectedPositions = positions?.split(',') ?? [];
+  const selectedBodyParts = bodyPart?.split(',') ?? [];
 
   const allFiltered = ALL_STRETCHES.filter(s => {
     const matchesPosition = s.positions.some(p => selectedPositions.includes(p));
-    const matchesBodyPart = bodyPart === 'general' || s.muscle === bodyPart;
+    const matchesBodyPart = bodyPart === 'general' || selectedBodyParts.includes(s.muscle);
     const matchesFeeling = !feeling || s.feelings.includes(feeling);
     return matchesPosition && matchesBodyPart && matchesFeeling;
   });
@@ -69,20 +70,15 @@ export default function SessionScreen() {
   const speak = (text: string) => {
     if (!voiceEnabled) return;
     Speech.stop();
-    Speech.speak(text, {
-      rate: 0.9,
-      pitch: 1.0,
-    });
+    Speech.speak(text, { rate: 0.9, pitch: 1.0 });
   };
 
-  // Announce stretch when it starts
   useEffect(() => {
     if (!current) return;
     halfwaySpokenRef.current = false;
     endSpokenRef.current = false;
     lastBreathRef.current = '';
-    const msg = `${current.name}. ${current.tip ?? ''}`;
-    speak(msg);
+    speak(`${current.name}. ${current.tip ?? ''}`);
   }, [index, voiceEnabled]);
 
   useEffect(() => {
@@ -101,14 +97,12 @@ export default function SessionScreen() {
       setTimeLeft(t => {
         const newTime = t <= 1 ? 0 : t - 1;
 
-        // Halfway cue
         const halfway = Math.floor(current.duration / 2);
         if (newTime === halfway && !halfwaySpokenRef.current) {
           halfwaySpokenRef.current = true;
           speak('Halfway there.');
         }
 
-        // Last 3 seconds cue
         if (newTime === 3 && !endSpokenRef.current) {
           endSpokenRef.current = true;
           speak(isLast ? 'Almost done. Great work.' : 'Get ready for the next stretch.');
@@ -123,7 +117,6 @@ export default function SessionScreen() {
 
       setTotalTimeSpent(t => t + 1);
 
-      // Breathing cues — only speak on phase change
       setTimeLeft(t => {
         if (!current) return t;
         const elapsed = current.duration - t;
@@ -137,7 +130,6 @@ export default function SessionScreen() {
         }
         return t;
       });
-
     }, 1000);
     return () => clearInterval(intervalRef.current!);
   }, [isRunning, index, voiceEnabled]);
@@ -149,17 +141,20 @@ export default function SessionScreen() {
     setFavourites(updated);
   };
 
+  const handleNotInterested = async () => {
+    if (!current) return;
+    await adjustWeight(current.id, 'down');
+    goNext();
+  };
+
   const toggleVoice = (val: boolean) => {
     setVoiceEnabled(val);
     if (!val) Speech.stop();
     else speak('Voice guidance on.');
   };
 
-  const goNext = async (skipped = false) => {
+  const goNext = async () => {
     Speech.stop();
-    if (current && skipped) {
-      await adjustWeight(current.id, 'down');
-    }
     if (isLast) {
       const streakData = await recordSession(totalTimeSpent, selectedPositions.join(','));
       router.replace({
@@ -201,7 +196,7 @@ export default function SessionScreen() {
       <StatusBar barStyle="dark-content" backgroundColor="#FAF7F2" />
       <SafeAreaView style={styles.container}>
 
-        {/* Top row — progress + voice toggle */}
+        {/* Top row */}
         <View style={styles.topRow}>
           <View style={styles.progressTrack}>
             <View style={[styles.progressFill, { width: `${progress}%` }]} />
@@ -255,24 +250,28 @@ export default function SessionScreen() {
             <Text style={styles.pauseText}>{isRunning ? '⏸ Pause' : '▶ Resume'}</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.favButton, isFavourited && styles.favButtonActive]}
-            onPress={handleFavourite}
-          >
-            <Text style={styles.favText}>
-              {isFavourited ? '❤️  Favourited' : '🤍  Favourite this stretch'}
-            </Text>
-          </TouchableOpacity>
+          {/* Favourite + Not Interested row */}
+          <View style={styles.feedbackRow}>
+            <TouchableOpacity
+              style={[styles.feedbackButton, isFavourited && styles.feedbackButtonActive]}
+              onPress={handleFavourite}
+            >
+              <Text style={styles.feedbackText}>{isFavourited ? '❤️  Saved' : '🤍  Favourite'}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.feedbackButton}
+              onPress={handleNotInterested}
+            >
+              <Text style={styles.feedbackText}>👎  Not for me</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
-        <View style={styles.actions}>
-          <TouchableOpacity style={styles.skipButton} onPress={() => goNext(true)}>
-            <Text style={styles.skipText}>⏭  Skip</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.nextButton} onPress={() => goNext(false)}>
-            <Text style={styles.nextText}>{isLast ? '🎉  Finish' : 'Next →'}</Text>
-          </TouchableOpacity>
-        </View>
+        {/* Next only */}
+        <TouchableOpacity style={styles.nextButton} onPress={goNext}>
+          <Text style={styles.nextText}>{isLast ? '🎉  Finish' : 'Next →'}</Text>
+        </TouchableOpacity>
 
       </SafeAreaView>
     </>
@@ -280,35 +279,33 @@ export default function SessionScreen() {
 }
 
 const styles = StyleSheet.create({
-  container:       { flex: 1, backgroundColor: '#FAF7F2', padding: 24 },
-  topRow:          { flexDirection: 'row', alignItems: 'center', marginBottom: 8, gap: 12 },
-  progressTrack:   { flex: 1, height: 4, backgroundColor: '#EDE5D8', borderRadius: 2 },
-  progressFill:    { height: 4, backgroundColor: '#C9A96E', borderRadius: 2 },
-  voiceToggle:     { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  voiceLabel:      { fontSize: 16 },
-  counter:         { color: '#9B8573', fontSize: 13, marginBottom: 20 },
-  card:            { backgroundColor: '#FFFFFF', borderRadius: 24, padding: 28, alignItems: 'center', marginBottom: 24, shadowColor: '#C9A96E', shadowOpacity: 0.1, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
-  muscle:          { color: '#C9A96E', fontSize: 13, fontWeight: '600', letterSpacing: 1.5, marginBottom: 6 },
-  name:            { color: '#2C2416', fontSize: 26, fontWeight: '700', textAlign: 'center', marginBottom: 16 },
-  tipBox:          { flexDirection: 'row', backgroundColor: '#FAF7F2', borderRadius: 12, padding: 12, marginBottom: 20, borderWidth: 1, borderColor: '#EDE5D8', alignItems: 'flex-start', gap: 8 },
-  tipIcon:         { fontSize: 14 },
-  tipText:         { flex: 1, fontSize: 13, color: '#9B8573', lineHeight: 20 },
-  timerCircle:     { width: 110, height: 110, borderRadius: 55, borderWidth: 3, borderColor: '#C9A96E', alignItems: 'center', justifyContent: 'center', marginBottom: 12, backgroundColor: '#FDF8F2' },
-  timerText:       { color: '#2C2416', fontSize: 40, fontWeight: '700' },
-  timerLabel:      { color: '#9B8573', fontSize: 12 },
-  breathingRow:    { marginBottom: 16, alignItems: 'center' },
-  breathingCue:    { fontSize: 15, fontWeight: '600', letterSpacing: 0.5 },
-  breatheIn:       { color: '#C9A96E' },
-  breatheOut:      { color: '#9B8573' },
-  pauseButton:     { paddingVertical: 10, paddingHorizontal: 24, borderRadius: 20, borderWidth: 1, borderColor: '#EDE5D8', marginBottom: 12 },
-  pauseText:       { color: '#9B8573', fontSize: 14 },
-  favButton:       { paddingVertical: 10, paddingHorizontal: 24, borderRadius: 20, borderWidth: 1, borderColor: '#EDE5D8' },
-  favButtonActive: { borderColor: '#C9A96E', backgroundColor: '#FDF8F2' },
-  favText:         { color: '#9B8573', fontSize: 14 },
-  actions:         { flexDirection: 'row', gap: 12 },
-  skipButton:      { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 16, padding: 18, alignItems: 'center', borderWidth: 1, borderColor: '#EDE5D8' },
-  skipText:        { color: '#9B8573', fontSize: 15, fontWeight: '600' },
-  nextButton:      { flex: 1, backgroundColor: '#C9A96E', borderRadius: 16, padding: 18, alignItems: 'center' },
-  nextText:        { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
-  emptyText:       { color: '#9B8573', fontSize: 16, textAlign: 'center', marginBottom: 24, marginTop: 40 },
+  container:          { flex: 1, backgroundColor: '#FAF7F2', padding: 24 },
+  topRow:             { flexDirection: 'row', alignItems: 'center', marginBottom: 8, gap: 12 },
+  progressTrack:      { flex: 1, height: 4, backgroundColor: '#EDE5D8', borderRadius: 2 },
+  progressFill:       { height: 4, backgroundColor: '#C9A96E', borderRadius: 2 },
+  voiceToggle:        { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  voiceLabel:         { fontSize: 16 },
+  counter:            { color: '#9B8573', fontSize: 13, marginBottom: 20 },
+  card:               { backgroundColor: '#FFFFFF', borderRadius: 24, padding: 28, alignItems: 'center', marginBottom: 24, shadowColor: '#C9A96E', shadowOpacity: 0.1, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
+  muscle:             { color: '#C9A96E', fontSize: 13, fontWeight: '600', letterSpacing: 1.5, marginBottom: 6 },
+  name:               { color: '#2C2416', fontSize: 26, fontWeight: '700', textAlign: 'center', marginBottom: 16 },
+  tipBox:             { flexDirection: 'row', backgroundColor: '#FAF7F2', borderRadius: 12, padding: 12, marginBottom: 20, borderWidth: 1, borderColor: '#EDE5D8', alignItems: 'flex-start', gap: 8 },
+  tipIcon:            { fontSize: 14 },
+  tipText:            { flex: 1, fontSize: 13, color: '#9B8573', lineHeight: 20 },
+  timerCircle:        { width: 110, height: 110, borderRadius: 55, borderWidth: 3, borderColor: '#C9A96E', alignItems: 'center', justifyContent: 'center', marginBottom: 12, backgroundColor: '#FDF8F2' },
+  timerText:          { color: '#2C2416', fontSize: 40, fontWeight: '700' },
+  timerLabel:         { color: '#9B8573', fontSize: 12 },
+  breathingRow:       { marginBottom: 16, alignItems: 'center' },
+  breathingCue:       { fontSize: 15, fontWeight: '600', letterSpacing: 0.5 },
+  breatheIn:          { color: '#C9A96E' },
+  breatheOut:         { color: '#9B8573' },
+  pauseButton:        { paddingVertical: 10, paddingHorizontal: 24, borderRadius: 20, borderWidth: 1, borderColor: '#EDE5D8', marginBottom: 16 },
+  pauseText:          { color: '#9B8573', fontSize: 14 },
+  feedbackRow:        { flexDirection: 'row', gap: 10 },
+  feedbackButton:     { flex: 1, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 20, borderWidth: 1, borderColor: '#EDE5D8', alignItems: 'center' },
+  feedbackButtonActive: { borderColor: '#C9A96E', backgroundColor: '#FDF8F2' },
+  feedbackText:       { color: '#9B8573', fontSize: 13 },
+  nextButton:         { backgroundColor: '#C9A96E', borderRadius: 16, padding: 18, alignItems: 'center' },
+  nextText:           { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
+  emptyText:          { color: '#9B8573', fontSize: 16, textAlign: 'center', marginBottom: 24, marginTop: 40 },
 });
