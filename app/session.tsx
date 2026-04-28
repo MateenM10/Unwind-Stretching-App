@@ -5,6 +5,7 @@ import { SafeAreaView, StatusBar, StyleSheet, Switch, Text, TouchableOpacity, Vi
 import StretchInfoSheet from '../components/StretchInfoSheet';
 import { recordSession } from '../utils/streaks';
 import { ALL_STRETCHES } from '../utils/stretches';
+import { colors, shadows, shared } from '../utils/theme';
 import { adjustWeight, getFavourites, getWeights, toggleFavourite, weightedShuffle } from '../utils/weights';
 
 const BREATHING_CYCLE = 8;
@@ -12,16 +13,11 @@ const BREATHING_CYCLE = 8;
 const getBreathingCue = (timeLeft: number, totalDuration: number): string => {
   const elapsed = totalDuration - timeLeft;
   const phase = elapsed % BREATHING_CYCLE;
-  if (phase < 4) return 'Breathe in...';
-  return 'Breathe out...';
+  return phase < 4 ? 'Breathe in...' : 'Breathe out...';
 };
 
 export default function SessionScreen() {
-  const { positions, bodyPart, feeling } = useLocalSearchParams<{
-    positions: string;
-    bodyPart: string;
-    feeling: string;
-  }>();
+  const { positions, bodyPart, feeling } = useLocalSearchParams<{ positions: string; bodyPart: string; feeling: string }>();
   const router = useRouter();
 
   const selectedPositions = positions?.split(',') ?? [];
@@ -82,51 +78,27 @@ export default function SessionScreen() {
     intervalRef.current = setInterval(() => {
       setTimeLeft(t => {
         const newTime = t <= 1 ? 0 : t - 1;
-
         const halfway = Math.floor(current.duration / 2);
-        if (newTime === halfway && !halfwaySpokenRef.current) {
-          halfwaySpokenRef.current = true;
-          speak('Halfway there.');
-        }
-
-        if (newTime === 3 && !endSpokenRef.current) {
-          endSpokenRef.current = true;
-          speak(isLast ? 'Almost done. Great work.' : 'Get ready for the next stretch.');
-        }
-
-        if (t <= 1) {
-          clearInterval(intervalRef.current!);
-          return 0;
-        }
+        if (newTime === halfway && !halfwaySpokenRef.current) { halfwaySpokenRef.current = true; speak('Halfway there.'); }
+        if (newTime === 3 && !endSpokenRef.current) { endSpokenRef.current = true; speak(isLast ? 'Almost done. Great work.' : 'Get ready for the next stretch.'); }
+        if (t <= 1) { clearInterval(intervalRef.current!); return 0; }
         return newTime;
       });
-
       setTotalTimeSpent(t => t + 1);
-
       setTimeLeft(t => {
         if (!current) return t;
-        const elapsed = current.duration - t;
-        const phase = elapsed % BREATHING_CYCLE;
-        if (phase === 0 && lastBreathRef.current !== 'in') {
-          lastBreathRef.current = 'in';
-          speak('Breathe in.');
-        } else if (phase === 4 && lastBreathRef.current !== 'out') {
-          lastBreathRef.current = 'out';
-          speak('Breathe out.');
-        }
+        const phase = (current.duration - t) % BREATHING_CYCLE;
+        if (phase === 0 && lastBreathRef.current !== 'in') { lastBreathRef.current = 'in'; speak('Breathe in.'); }
+        else if (phase === 4 && lastBreathRef.current !== 'out') { lastBreathRef.current = 'out'; speak('Breathe out.'); }
         return t;
       });
-
     }, 1000);
     return () => clearInterval(intervalRef.current!);
   }, [isRunning, index, voiceEnabled]);
 
-  // Auto advance when timer hits 0
   useEffect(() => {
     if (timeLeft === 0) {
-      const timeout = setTimeout(() => {
-        goNext();
-      }, 2000);
+      const timeout = setTimeout(() => goNext(), 2000);
       return () => clearTimeout(timeout);
     }
   }, [timeLeft]);
@@ -146,22 +118,14 @@ export default function SessionScreen() {
 
   const toggleVoice = (val: boolean) => {
     setVoiceEnabled(val);
-    if (!val) Speech.stop();
-    else speak('Voice guidance on.');
+    if (!val) Speech.stop(); else speak('Voice guidance on.');
   };
 
   const goNext = async () => {
     Speech.stop();
     if (isLast) {
       const streakData = await recordSession(totalTimeSpent, selectedPositions.join(','));
-      router.replace({
-        pathname: '/complete',
-        params: {
-          count: stretches.length.toString(),
-          totalTime: totalTimeSpent.toString(),
-          streak: streakData.currentStreak.toString(),
-        },
-      });
+      router.replace({ pathname: '/complete', params: { count: stretches.length.toString(), totalTime: totalTimeSpent.toString(), streak: streakData.currentStreak.toString() } });
       return;
     }
     const next = index + 1;
@@ -174,11 +138,11 @@ export default function SessionScreen() {
     return (
       <>
         <Stack.Screen options={{ headerShown: false }} />
-        <StatusBar barStyle="dark-content" backgroundColor="#FAF7F2" />
-        <SafeAreaView style={styles.container}>
-          <Text style={styles.emptyText}>No stretches found for this combination.</Text>
-          <TouchableOpacity style={styles.nextButton} onPress={() => router.replace('/' as any)}>
-            <Text style={styles.nextText}>Go Back</Text>
+        <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
+        <SafeAreaView style={shared.screen}>
+          <Text style={shared.emptyText}>No stretches found for this combination.</Text>
+          <TouchableOpacity style={shared.primaryButton} onPress={() => router.replace('/' as any)}>
+            <Text style={shared.primaryButtonText}>Go Back</Text>
           </TouchableOpacity>
         </SafeAreaView>
       </>
@@ -190,47 +154,35 @@ export default function SessionScreen() {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <StatusBar barStyle="dark-content" backgroundColor="#FAF7F2" />
-      <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
+      <SafeAreaView style={shared.screen}>
 
-        {/* Top row */}
         <View style={styles.topRow}>
-          <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: `${progress}%` }]} />
+          <View style={shared.progressTrack}>
+            <View style={[shared.progressFill, { width: `${progress}%` }]} />
           </View>
           <View style={styles.voiceToggle}>
-            <Text style={styles.voiceLabel}>{voiceEnabled ? '🔊' : '🔇'}</Text>
-            <Switch
-              value={voiceEnabled}
-              onValueChange={toggleVoice}
-              trackColor={{ false: '#EDE5D8', true: '#C9A96E' }}
-              thumbColor="#FFFFFF"
-              style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
-            />
+            <Text>{voiceEnabled ? '🔊' : '🔇'}</Text>
+            <Switch value={voiceEnabled} onValueChange={toggleVoice} trackColor={{ false: colors.border, true: colors.accent }} thumbColor={colors.white} style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }} />
           </View>
         </View>
 
         <Text style={styles.counter}>{index + 1} of {stretches.length}</Text>
 
-        {/* Main card */}
         <View style={styles.card}>
           <Text style={styles.muscle}>{current.muscle.toUpperCase()}</Text>
 
-          {/* Name + info button */}
           <View style={styles.nameRow}>
             <Text style={styles.name}>{current.name}</Text>
-            <TouchableOpacity
-              style={styles.infoButton}
-              onPress={() => setShowInfo(true)}
-            >
+            <TouchableOpacity style={styles.infoButton} onPress={() => setShowInfo(true)}>
               <Text style={styles.infoIcon}>ⓘ</Text>
             </TouchableOpacity>
           </View>
 
           {current.tip && (
-            <View style={styles.tipBox}>
-              <Text style={styles.tipIcon}>💡</Text>
-              <Text style={styles.tipText}>{current.tip}</Text>
+            <View style={shared.tipBox}>
+              <Text>💡</Text>
+              <Text style={shared.tipText}>{current.tip}</Text>
             </View>
           )}
 
@@ -240,57 +192,32 @@ export default function SessionScreen() {
           </View>
 
           {isRunning && (
-            <View style={styles.breathingRow}>
-              <Text style={[styles.breathingCue, isBreathingIn ? styles.breatheIn : styles.breatheOut]}>
-                {breathingCue}
-              </Text>
-            </View>
+            <Text style={[styles.breathingCue, { color: isBreathingIn ? colors.accent : colors.textMid }]}>
+              {breathingCue}
+            </Text>
           )}
 
-          {timeLeft === 0 && (
-            <Text style={styles.doneText}>✓ Done! Next up in a moment...</Text>
-          )}
+          {timeLeft === 0 && <Text style={styles.doneText}>✓ Done! Next up in a moment...</Text>}
 
-          <TouchableOpacity
-            style={styles.pauseButton}
-            onPress={() => {
-              if (isRunning) Speech.stop();
-              setIsRunning(r => !r);
-            }}
-          >
-            <Text style={styles.pauseText}>{isRunning ? '⏸ Pause' : '▶ Resume'}</Text>
+          <TouchableOpacity style={[shared.ghostButton, { marginBottom: 16 }]} onPress={() => { if (isRunning) Speech.stop(); setIsRunning(r => !r); }}>
+            <Text style={shared.ghostButtonText}>{isRunning ? '⏸ Pause' : '▶ Resume'}</Text>
           </TouchableOpacity>
 
-          {/* Favourite + Not Interested */}
           <View style={styles.feedbackRow}>
-            <TouchableOpacity
-              style={[styles.feedbackButton, isFavourited && styles.feedbackButtonActive]}
-              onPress={handleFavourite}
-            >
+            <TouchableOpacity style={[styles.feedbackButton, isFavourited && styles.feedbackButtonActive]} onPress={handleFavourite}>
               <Text style={styles.feedbackText}>{isFavourited ? '❤️  Saved' : '🤍  Favourite'}</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.feedbackButton}
-              onPress={handleNotInterested}
-            >
+            <TouchableOpacity style={styles.feedbackButton} onPress={handleNotInterested}>
               <Text style={styles.feedbackText}>👎  Not for me</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Next button */}
-        <TouchableOpacity style={styles.nextButton} onPress={goNext}>
-          <Text style={styles.nextText}>{isLast ? '🎉  Finish' : 'Next →'}</Text>
+        <TouchableOpacity style={shared.primaryButton} onPress={goNext}>
+          <Text style={shared.primaryButtonText}>{isLast ? '🎉  Finish' : 'Next →'}</Text>
         </TouchableOpacity>
 
-        {/* Info sheet */}
-        <StretchInfoSheet
-          visible={showInfo}
-          onClose={() => setShowInfo(false)}
-          stretchName={current.name}
-          muscle={current.muscle}
-        />
+        <StretchInfoSheet visible={showInfo} onClose={() => setShowInfo(false)} stretchName={current.name} muscle={current.muscle} />
 
       </SafeAreaView>
     </>
@@ -298,37 +225,22 @@ export default function SessionScreen() {
 }
 
 const styles = StyleSheet.create({
-  container:           { flex: 1, backgroundColor: '#FAF7F2', padding: 24 },
   topRow:              { flexDirection: 'row', alignItems: 'center', marginBottom: 8, gap: 12 },
-  progressTrack:       { flex: 1, height: 4, backgroundColor: '#EDE5D8', borderRadius: 2 },
-  progressFill:        { height: 4, backgroundColor: '#C9A96E', borderRadius: 2 },
   voiceToggle:         { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  voiceLabel:          { fontSize: 16 },
-  counter:             { color: '#9B8573', fontSize: 13, marginBottom: 20 },
-  card:                { backgroundColor: '#FFFFFF', borderRadius: 24, padding: 28, alignItems: 'center', marginBottom: 24, shadowColor: '#C9A96E', shadowOpacity: 0.1, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 3 },
-  muscle:              { color: '#C9A96E', fontSize: 13, fontWeight: '600', letterSpacing: 1.5, marginBottom: 6 },
+  counter:             { color: colors.textMid, fontSize: 13, marginBottom: 20 },
+  card:                { backgroundColor: colors.white, borderRadius: 24, padding: 28, alignItems: 'center', marginBottom: 24, ...shadows.accent },
+  muscle:              { color: colors.accent, fontSize: 13, fontWeight: '600', letterSpacing: 1.5, marginBottom: 6 },
   nameRow:             { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 16 },
-  name:                { color: '#2C2416', fontSize: 24, fontWeight: '700', textAlign: 'center', flexShrink: 1 },
-  infoButton:          { width: 28, height: 28, borderRadius: 14, backgroundColor: '#FAF7F2', borderWidth: 1, borderColor: '#EDE5D8', alignItems: 'center', justifyContent: 'center' },
-  infoIcon:            { fontSize: 15, color: '#C9A96E', fontWeight: '700' },
-  tipBox:              { flexDirection: 'row', backgroundColor: '#FAF7F2', borderRadius: 12, padding: 12, marginBottom: 20, borderWidth: 1, borderColor: '#EDE5D8', alignItems: 'flex-start', gap: 8 },
-  tipIcon:             { fontSize: 14 },
-  tipText:             { flex: 1, fontSize: 13, color: '#9B8573', lineHeight: 20 },
-  timerCircle:         { width: 110, height: 110, borderRadius: 55, borderWidth: 3, borderColor: '#C9A96E', alignItems: 'center', justifyContent: 'center', marginBottom: 12, backgroundColor: '#FDF8F2' },
-  timerText:           { color: '#2C2416', fontSize: 40, fontWeight: '700' },
-  timerLabel:          { color: '#9B8573', fontSize: 12 },
-  breathingRow:        { marginBottom: 12, alignItems: 'center' },
-  breathingCue:        { fontSize: 15, fontWeight: '600', letterSpacing: 0.5 },
-  breatheIn:           { color: '#C9A96E' },
-  breatheOut:          { color: '#9B8573' },
-  doneText:            { color: '#8DB87A', fontSize: 14, fontWeight: '600', marginBottom: 12 },
-  pauseButton:         { paddingVertical: 10, paddingHorizontal: 24, borderRadius: 20, borderWidth: 1, borderColor: '#EDE5D8', marginBottom: 16 },
-  pauseText:           { color: '#9B8573', fontSize: 14 },
+  name:                { color: colors.textDark, fontSize: 24, fontWeight: '700', textAlign: 'center', flexShrink: 1 },
+  infoButton:          { width: 28, height: 28, borderRadius: 14, backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
+  infoIcon:            { fontSize: 15, color: colors.accent, fontWeight: '700' },
+  timerCircle:         { width: 110, height: 110, borderRadius: 55, borderWidth: 3, borderColor: colors.accent, alignItems: 'center', justifyContent: 'center', marginBottom: 12, backgroundColor: colors.accentLight },
+  timerText:           { color: colors.textDark, fontSize: 40, fontWeight: '700' },
+  timerLabel:          { color: colors.textMid, fontSize: 12 },
+  breathingCue:        { fontSize: 15, fontWeight: '600', letterSpacing: 0.5, marginBottom: 12 },
+  doneText:            { color: colors.success, fontSize: 14, fontWeight: '600', marginBottom: 12 },
   feedbackRow:         { flexDirection: 'row', gap: 10 },
-  feedbackButton:      { flex: 1, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 20, borderWidth: 1, borderColor: '#EDE5D8', alignItems: 'center' },
-  feedbackButtonActive:{ borderColor: '#C9A96E', backgroundColor: '#FDF8F2' },
-  feedbackText:        { color: '#9B8573', fontSize: 13 },
-  nextButton:          { backgroundColor: '#C9A96E', borderRadius: 16, padding: 18, alignItems: 'center' },
-  nextText:            { color: '#FFFFFF', fontSize: 15, fontWeight: '700' },
-  emptyText:           { color: '#9B8573', fontSize: 16, textAlign: 'center', marginBottom: 24, marginTop: 40 },
+  feedbackButton:      { flex: 1, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 20, borderWidth: 1, borderColor: colors.border, alignItems: 'center' },
+  feedbackButtonActive:{ borderColor: colors.accent, backgroundColor: colors.accentLight },
+  feedbackText:        { color: colors.textMid, fontSize: 13 },
 });
