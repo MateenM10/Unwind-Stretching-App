@@ -2,6 +2,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import * as Speech from 'expo-speech';
 import { useEffect, useRef, useState } from 'react';
 import { SafeAreaView, StatusBar, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import PulsingTimer from '../components/PulsingTimer';
 import StretchInfoSheet from '../components/StretchInfoSheet';
 import { recordSession } from '../utils/streaks';
 import { ALL_STRETCHES } from '../utils/stretches';
@@ -157,18 +158,26 @@ export default function SessionScreen() {
       <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
       <SafeAreaView style={shared.screen}>
 
+        {/* Top row */}
         <View style={styles.topRow}>
           <View style={shared.progressTrack}>
             <View style={[shared.progressFill, { width: `${progress}%` }]} />
           </View>
           <View style={styles.voiceToggle}>
             <Text>{voiceEnabled ? '🔊' : '🔇'}</Text>
-            <Switch value={voiceEnabled} onValueChange={toggleVoice} trackColor={{ false: colors.border, true: colors.accent }} thumbColor={colors.white} style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }} />
+            <Switch
+              value={voiceEnabled}
+              onValueChange={toggleVoice}
+              trackColor={{ false: colors.border, true: colors.accent }}
+              thumbColor={colors.white}
+              style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
+            />
           </View>
         </View>
 
         <Text style={styles.counter}>{index + 1} of {stretches.length}</Text>
 
+        {/* Main card */}
         <View style={styles.card}>
           <Text style={styles.muscle}>{current.muscle.toUpperCase()}</Text>
 
@@ -186,10 +195,12 @@ export default function SessionScreen() {
             </View>
           )}
 
-          <View style={styles.timerCircle}>
-            <Text style={styles.timerText}>{timeLeft}</Text>
-            <Text style={styles.timerLabel}>secs</Text>
-          </View>
+          {/* Pulsing timer */}
+          <PulsingTimer
+            timeLeft={timeLeft}
+            isRunning={isRunning}
+            isBreathingIn={isBreathingIn}
+          />
 
           {isRunning && (
             <Text style={[styles.breathingCue, { color: isBreathingIn ? colors.accent : colors.textMid }]}>
@@ -197,14 +208,22 @@ export default function SessionScreen() {
             </Text>
           )}
 
-          {timeLeft === 0 && <Text style={styles.doneText}>✓ Done! Next up in a moment...</Text>}
+          {timeLeft === 0 && (
+            <Text style={styles.doneText}>✓ Done! Next up in a moment...</Text>
+          )}
 
-          <TouchableOpacity style={[shared.ghostButton, { marginBottom: 16 }]} onPress={() => { if (isRunning) Speech.stop(); setIsRunning(r => !r); }}>
+          <TouchableOpacity
+            style={[shared.ghostButton, { marginBottom: 16 }]}
+            onPress={() => { if (isRunning) Speech.stop(); setIsRunning(r => !r); }}
+          >
             <Text style={shared.ghostButtonText}>{isRunning ? '⏸ Pause' : '▶ Resume'}</Text>
           </TouchableOpacity>
 
           <View style={styles.feedbackRow}>
-            <TouchableOpacity style={[styles.feedbackButton, isFavourited && styles.feedbackButtonActive]} onPress={handleFavourite}>
+            <TouchableOpacity
+              style={[styles.feedbackButton, isFavourited && styles.feedbackButtonActive]}
+              onPress={handleFavourite}
+            >
               <Text style={styles.feedbackText}>{isFavourited ? '❤️  Saved' : '🤍  Favourite'}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.feedbackButton} onPress={handleNotInterested}>
@@ -217,7 +236,12 @@ export default function SessionScreen() {
           <Text style={shared.primaryButtonText}>{isLast ? '🎉  Finish' : 'Next →'}</Text>
         </TouchableOpacity>
 
-        <StretchInfoSheet visible={showInfo} onClose={() => setShowInfo(false)} stretchName={current.name} muscle={current.muscle} />
+        <StretchInfoSheet
+          visible={showInfo}
+          onClose={() => setShowInfo(false)}
+          stretchName={current.name}
+          muscle={current.muscle}
+        />
 
       </SafeAreaView>
     </>
@@ -234,9 +258,6 @@ const styles = StyleSheet.create({
   name:                { color: colors.textDark, fontSize: 24, fontWeight: '700', textAlign: 'center', flexShrink: 1 },
   infoButton:          { width: 28, height: 28, borderRadius: 14, backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
   infoIcon:            { fontSize: 15, color: colors.accent, fontWeight: '700' },
-  timerCircle:         { width: 110, height: 110, borderRadius: 55, borderWidth: 3, borderColor: colors.accent, alignItems: 'center', justifyContent: 'center', marginBottom: 12, backgroundColor: colors.accentLight },
-  timerText:           { color: colors.textDark, fontSize: 40, fontWeight: '700' },
-  timerLabel:          { color: colors.textMid, fontSize: 12 },
   breathingCue:        { fontSize: 15, fontWeight: '600', letterSpacing: 0.5, marginBottom: 12 },
   doneText:            { color: colors.success, fontSize: 14, fontWeight: '600', marginBottom: 12 },
   feedbackRow:         { flexDirection: 'row', gap: 10 },

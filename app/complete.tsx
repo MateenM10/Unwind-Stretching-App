@@ -1,10 +1,13 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useRef } from 'react';
 import { SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import ConfettiCannon from 'react-native-confetti-cannon';
 import { colors, shadows, shared } from '../utils/theme';
 
 export default function CompleteScreen() {
   const { count, totalTime, streak } = useLocalSearchParams<{ count: string; totalTime: string; streak: string }>();
   const router = useRouter();
+  const confettiRef = useRef<any>(null);
 
   const streakNum = parseInt(streak ?? '1');
   const countNum = parseInt(count ?? '0');
@@ -21,11 +24,30 @@ export default function CompleteScreen() {
     return '💪 Keep it up!';
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      confettiRef.current?.start();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
       <SafeAreaView style={styles.container}>
+
+        {/* Confetti */}
+        <ConfettiCannon
+          ref={confettiRef}
+          count={80}
+          origin={{ x: -10, y: 0 }}
+          autoStart={false}
+          fadeOut
+          colors={['#C9A96E', '#FAF7F2', '#EDE5D8', '#9B8573', '#FFFFFF', '#D4B896']}
+          fallSpeed={3000}
+          explosionSpeed={350}
+        />
 
         <View style={styles.heroSection}>
           <Text style={styles.emoji}>🎉</Text>
@@ -35,9 +57,9 @@ export default function CompleteScreen() {
 
         <View style={styles.statsRow}>
           {[
-            { value: countNum,     label: 'Stretches'  },
-            { value: timeDisplay,  label: 'Time Spent' },
-            { value: streakNum,    label: 'Day Streak'  },
+            { value: countNum,    label: 'Stretches'  },
+            { value: timeDisplay, label: 'Time Spent' },
+            { value: streakNum,   label: 'Day Streak' },
           ].map((stat, i) => (
             <View key={i} style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
               {i > 0 && <View style={styles.statDivider} />}
@@ -53,7 +75,13 @@ export default function CompleteScreen() {
           <Text style={styles.streakText}>{getStreakMessage()}</Text>
         </View>
 
-        <TouchableOpacity style={[shared.primaryButton, { marginBottom: 12 }]} onPress={() => router.replace('/' as any)}>
+        <TouchableOpacity
+          style={[shared.primaryButton, { marginBottom: 12 }]}
+          onPress={() => {
+            confettiRef.current?.start();
+            router.replace('/' as any);
+          }}
+        >
           <Text style={shared.primaryButtonText}>Go Again →</Text>
         </TouchableOpacity>
 
