@@ -3,15 +3,16 @@ import { useState } from 'react';
 import { SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const BODY_PARTS = [
-  { id: 'neck',       label: '🙆',  name: 'Neck'       },
-  { id: 'shoulders',  label: '💪',  name: 'Shoulders'  },
-  { id: 'chest',      label: '❤️',  name: 'Chest'      },
-  { id: 'back',       label: '🔄',  name: 'Back'       },
-  { id: 'hips',       label: '🌀',  name: 'Hips'       },
-  { id: 'quads',      label: '🦵',  name: 'Quads'      },
-  { id: 'hamstrings', label: '🦵',  name: 'Hamstrings' },
-  { id: 'calves',     label: '🦶',  name: 'Calves'     },
-  { id: 'ankles',     label: '🔁',  name: 'Ankles'     },
+  { id: 'neck',       emoji: '🙆',  name: 'Neck'       },
+  { id: 'shoulders',  emoji: '💪',  name: 'Shoulders'  },
+  { id: 'chest',      emoji: '❤️',  name: 'Chest'      },
+  { id: 'back',       emoji: '🔄',  name: 'Back'       },
+  { id: 'hips',       emoji: '🌀',  name: 'Hips'       },
+  { id: 'glutes',     emoji: '🍑',  name: 'Glutes'     },
+  { id: 'quads',      emoji: '🦵',  name: 'Quads'      },
+  { id: 'hamstrings', emoji: '🦵',  name: 'Hamstrings' },
+  { id: 'calves',     emoji: '🦶',  name: 'Calves'     },
+  { id: 'ankles',     emoji: '🔁',  name: 'Ankles'     },
 ];
 
 export default function BodyPartPicker() {
@@ -36,34 +37,19 @@ export default function BodyPartPicker() {
     });
   };
 
-  const handleGeneral = () => {
-    router.push({
-      pathname: '/session',
-      params: { positions, bodyPart: 'general' },
-    });
-  };
-
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <StatusBar barStyle="dark-content" backgroundColor="#FAF7F2" />
       <SafeAreaView style={styles.container}>
 
-        <Text style={styles.title}>Any focus today?</Text>
-        <Text style={styles.subtitle}>Pick one or more areas, or go general</Text>
-
-        {/* General — full width at top */}
-        <TouchableOpacity style={styles.generalButton} onPress={handleGeneral}>
-          <Text style={styles.generalEmoji}>✨</Text>
-          <View>
-            <Text style={styles.generalLabel}>General</Text>
-            <Text style={styles.generalDesc}>Stretch everything</Text>
-          </View>
-        </TouchableOpacity>
-
-        <Text style={styles.sectionLabel}>OR PICK YOUR FOCUS</Text>
+        <View style={styles.heroSection}>
+          <Text style={styles.title}>Any Focus Today?</Text>
+          <Text style={styles.subtitle}>Pick one or more areas, or select all</Text>
+        </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>
+
           {/* 2-column grid */}
           <View style={styles.grid}>
             {BODY_PARTS.map(part => (
@@ -72,7 +58,7 @@ export default function BodyPartPicker() {
                 style={[styles.gridCard, isSelected(part.id) && styles.gridCardSelected]}
                 onPress={() => toggle(part.id)}
               >
-                <Text style={styles.gridEmoji}>{part.label}</Text>
+                <Text style={styles.gridEmoji}>{part.emoji}</Text>
                 <Text style={[styles.gridName, isSelected(part.id) && styles.gridNameSelected]}>
                   {part.name}
                 </Text>
@@ -85,12 +71,14 @@ export default function BodyPartPicker() {
             ))}
           </View>
 
-          {/* Select all */}
+          {/* Select all / Deselect all */}
           <TouchableOpacity
             style={[styles.allButton, allSelected && styles.allButtonSelected]}
-            onPress={selectAll}
+            onPress={allSelected ? () => setSelected([]) : selectAll}
           >
-            <Text style={styles.allButtonText}>✦  Select All Areas</Text>
+            <Text style={styles.allButtonText}>
+              {allSelected ? '✦  Deselect All' : '✦  Select All Areas'}
+            </Text>
           </TouchableOpacity>
 
           <View style={{ height: 100 }} />
@@ -114,22 +102,18 @@ export default function BodyPartPicker() {
 
 const styles = StyleSheet.create({
   container:         { flex: 1, backgroundColor: '#FAF7F2', padding: 24 },
-  title:             { fontSize: 26, fontWeight: '700', color: '#2C2416', marginBottom: 4 },
-  subtitle:          { fontSize: 14, color: '#9B8573', marginBottom: 20 },
-  generalButton:     { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 18, borderWidth: 2, borderColor: '#C9A96E', marginBottom: 20, flexDirection: 'row', alignItems: 'center', gap: 14, shadowColor: '#C9A96E', shadowOpacity: 0.12, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, elevation: 2 },
-  generalEmoji:      { fontSize: 28 },
-  generalLabel:      { fontSize: 16, fontWeight: '700', color: '#C9A96E' },
-  generalDesc:       { fontSize: 13, color: '#9B8573', marginTop: 2 },
-  sectionLabel:      { fontSize: 11, fontWeight: '700', color: '#C4B5A5', letterSpacing: 1.5, marginBottom: 14 },
-  grid:              { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 12 },
-  gridCard:          { width: '47.5%', backgroundColor: '#FFFFFF', borderRadius: 16, padding: 18, alignItems: 'center', borderWidth: 2, borderColor: 'transparent', shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, shadowOffset: { width: 0, height: 1 }, elevation: 1, position: 'relative' },
+  heroSection:       { alignItems: 'center', marginBottom: 28 },
+  title:             { fontSize: 32, fontWeight: '800', color: '#2C2416', textAlign: 'center', marginBottom: 8 },
+  subtitle:          { fontSize: 15, color: '#9B8573', textAlign: 'center' },
+  grid:              { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 14 },
+  gridCard:          { width: '47.5%', backgroundColor: '#FFFFFF', borderRadius: 16, paddingVertical: 24, paddingHorizontal: 8, alignItems: 'center', borderWidth: 2, borderColor: 'transparent', shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, shadowOffset: { width: 0, height: 1 }, elevation: 1, position: 'relative' },
   gridCardSelected:  { borderColor: '#C9A96E', backgroundColor: '#FDF8F2' },
   gridEmoji:         { fontSize: 30, marginBottom: 8 },
-  gridName:          { fontSize: 15, fontWeight: '600', color: '#2C2416' },
+  gridName:          { fontSize: 14, fontWeight: '600', color: '#2C2416', textAlign: 'center' },
   gridNameSelected:  { color: '#C9A96E' },
-  gridCheck:         { position: 'absolute', top: 10, right: 10, width: 20, height: 20, borderRadius: 10, backgroundColor: '#C9A96E', alignItems: 'center', justifyContent: 'center' },
+  gridCheck:         { position: 'absolute', top: 8, right: 8, width: 20, height: 20, borderRadius: 10, backgroundColor: '#C9A96E', alignItems: 'center', justifyContent: 'center' },
   gridCheckText:     { color: '#FFFFFF', fontSize: 11, fontWeight: '700' },
-  allButton:         { borderRadius: 16, padding: 16, borderWidth: 2, borderColor: '#EDE5D8', alignItems: 'center', marginBottom: 12 },
+  allButton:         { borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 2, borderColor: '#EDE5D8', alignItems: 'center' },
   allButtonSelected: { borderColor: '#C9A96E', backgroundColor: '#FDF8F2' },
   allButtonText:     { fontSize: 15, fontWeight: '600', color: '#C9A96E' },
   startWrapper:      { position: 'absolute', bottom: 24, left: 24, right: 24 },

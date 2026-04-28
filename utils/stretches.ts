@@ -107,4 +107,23 @@ export const ALL_STRETCHES = [
     feelings: ['tight', 'low-energy'],
     tip: 'Tuck your pelvis slightly under — this is the key move most people miss. You should feel the stretch at the front of your back leg\'s hip, not your knee.',
   },
+
+  {
+    id: '13',
+    name: 'Glute Bridge',
+    muscle: 'glutes',
+    duration: 40,
+    positions: ['lying'],
+    feelings: ['tight', 'sore'],
+    tip: 'Press through your heels and squeeze your glutes at the top. Keep your core engaged so your lower back doesn\'t arch excessively.',
+  },
+  {
+    id: '14',
+    name: 'Seated Glute Stretch',
+    muscle: 'glutes',
+    duration: 40,
+    positions: ['couch'],
+    feelings: ['tight', 'sore'],
+    tip: 'Cross one ankle over the opposite knee and sit tall. Gently lean forward from your hips to feel the stretch deep in your glute.',
+  },
 ];

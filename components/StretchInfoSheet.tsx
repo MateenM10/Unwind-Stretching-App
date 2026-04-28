@@ -8,7 +8,6 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import StretchIllustration from './StretchIllustration';
 
 const { height } = Dimensions.get('window');
 
@@ -47,6 +46,13 @@ const STEPS: Record<string, string[]> = {
     'Flex your foot to protect your knee joint',
     'Pull both legs gently toward your chest',
     'Hold then switch sides',
+  ],
+  glutes: [
+    'Lie on your back with knees bent and feet flat',
+    'Press through your heels and lift your hips toward the ceiling',
+    'Squeeze your glutes hard at the top',
+    'Hold for 2 seconds then lower slowly',
+    'Repeat or hold at the top for a static stretch',
   ],
   quads: [
     'Stand near a wall for balance if needed',
@@ -112,11 +118,6 @@ export default function StretchInfoSheet({ visible, onClose, stretchName, muscle
             <Text style={styles.muscle}>{muscle.toUpperCase()}</Text>
             <Text style={styles.name}>{stretchName}</Text>
 
-            {/* Illustration */}
-            <View style={styles.illustrationBox}>
-              <StretchIllustration muscle={muscle} />
-            </View>
-
             <Text style={styles.stepsTitle}>How to do it</Text>
             {steps.map((step, i) => (
               <View key={i} style={styles.stepRow}>
@@ -141,18 +142,17 @@ export default function StretchInfoSheet({ visible, onClose, stretchName, muscle
 }
 
 const styles = StyleSheet.create({
-  overlay:          { flex: 1, justifyContent: 'flex-end' },
-  backdrop:         { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
-  sheet:            { backgroundColor: '#FAF7F2', borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 24, maxHeight: height * 0.85 },
-  handle:           { width: 40, height: 4, backgroundColor: '#EDE5D8', borderRadius: 2, alignSelf: 'center', marginBottom: 20 },
-  muscle:           { fontSize: 11, fontWeight: '700', color: '#C9A96E', letterSpacing: 1.5, marginBottom: 4 },
-  name:             { fontSize: 24, fontWeight: '700', color: '#2C2416', marginBottom: 20 },
-  illustrationBox:  { backgroundColor: '#FFFFFF', borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginBottom: 24, height: 200, shadowColor: '#C9A96E', shadowOpacity: 0.08, shadowRadius: 10, shadowOffset: { width: 0, height: 3 }, elevation: 2 },
-  stepsTitle:       { fontSize: 16, fontWeight: '700', color: '#2C2416', marginBottom: 16 },
-  stepRow:          { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 14, gap: 12 },
-  stepNumber:       { width: 26, height: 26, borderRadius: 13, backgroundColor: '#C9A96E', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  stepNumberText:   { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
-  stepText:         { flex: 1, fontSize: 14, color: '#2C2416', lineHeight: 22 },
-  closeButton:      { backgroundColor: '#C9A96E', borderRadius: 16, padding: 18, alignItems: 'center', marginTop: 8 },
-  closeText:        { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
+  overlay:        { flex: 1, justifyContent: 'flex-end' },
+  backdrop:       { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
+  sheet:          { backgroundColor: '#FAF7F2', borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 24, maxHeight: height * 0.75 },
+  handle:         { width: 40, height: 4, backgroundColor: '#EDE5D8', borderRadius: 2, alignSelf: 'center', marginBottom: 20 },
+  muscle:         { fontSize: 11, fontWeight: '700', color: '#C9A96E', letterSpacing: 1.5, marginBottom: 4 },
+  name:           { fontSize: 24, fontWeight: '700', color: '#2C2416', marginBottom: 24 },
+  stepsTitle:     { fontSize: 16, fontWeight: '700', color: '#2C2416', marginBottom: 16 },
+  stepRow:        { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 14, gap: 12 },
+  stepNumber:     { width: 26, height: 26, borderRadius: 13, backgroundColor: '#C9A96E', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  stepNumberText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700' },
+  stepText:       { flex: 1, fontSize: 14, color: '#2C2416', lineHeight: 22 },
+  closeButton:    { backgroundColor: '#C9A96E', borderRadius: 16, padding: 18, alignItems: 'center', marginTop: 8 },
+  closeText:      { color: '#FFFFFF', fontSize: 16, fontWeight: '700' },
 });
