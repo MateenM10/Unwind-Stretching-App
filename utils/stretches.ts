@@ -1,3 +1,14 @@
+export type Stretch = {
+  id: string;
+  name: string;
+  muscle: string;
+  duration: number;
+  positions: string[];
+  feelings: string[];
+  tip: string;
+  steps: string[];
+};
+
 export const ALL_STRETCHES = [
 
   // ─── NECK ───────────────────────────────────────────

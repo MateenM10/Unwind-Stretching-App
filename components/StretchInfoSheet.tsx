@@ -9,24 +9,16 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { ALL_STRETCHES } from '../utils/stretches';
+import { ALL_STRETCHES, Stretch } from '../utils/stretches';
 import { colors, shared } from '../utils/theme';
 
 const { height } = Dimensions.get('window');
 
 const ANIMATIONS: Record<string, any> = {
-  neck: require('../assets/images/animations/neck.gif'),
-  // Uncomment as you add more GIFs:
-  // shoulders:  require('../assets/images/animations/shoulders.gif'),
-  // chest:      require('../assets/images/animations/chest.gif'),
-  // back:       require('../assets/images/animations/back.gif'),
-  // hips:       require('../assets/images/animations/hips.gif'),
-  // glutes:     require('../assets/images/animations/glutes.gif'),
-  // quads:      require('../assets/images/animations/quads.gif'),
-  // hamstrings: require('../assets/images/animations/hamstrings.gif'),
-  // calves:     require('../assets/images/animations/calves.gif'),
-  // ankles:     require('../assets/images/animations/ankles.gif'),
-  // general:    require('../assets/images/animations/general.gif'),
+  n1: require('../assets/images/animations/neck.gif'),
+  n2: require('../assets/images/animations/earShoulder.gif'),
+
+  
 };
 
 interface Props {
@@ -38,9 +30,9 @@ interface Props {
 }
 
 export default function StretchInfoSheet({ visible, onClose, stretchId, stretchName, muscle }: Props) {
-  const stretch = ALL_STRETCHES.find(s => s.id === stretchId);
-  const steps = stretch?.steps ?? ['No instructions available for this stretch yet.'];
-  const animation = ANIMATIONS[muscle];
+  const stretch: Stretch | undefined = ALL_STRETCHES.find(s => s.id === stretchId);
+  const steps: string[] = stretch?.steps ?? ['No instructions available for this stretch yet.'];
+  const animation = ANIMATIONS[stretchId];
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>

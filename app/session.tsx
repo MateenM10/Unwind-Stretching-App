@@ -239,6 +239,7 @@ export default function SessionScreen() {
         <StretchInfoSheet
           visible={showInfo}
           onClose={() => setShowInfo(false)}
+            stretchId={current.id}    
           stretchName={current.name}
           muscle={current.muscle}
         />
