@@ -1,13 +1,13 @@
 import { Image } from 'expo-image';
 import React from 'react';
 import {
-    Dimensions,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { ALL_STRETCHES, Stretch } from '../utils/stretches';
 import { colors, shared } from '../utils/theme';
@@ -18,6 +18,7 @@ const ANIMATIONS: Record<string, any> = {
   n1: require('../assets/images/animations/neck.gif'),
   n2: require('../assets/images/animations/earShoulder.gif'),
 
+  
   
 };
 
