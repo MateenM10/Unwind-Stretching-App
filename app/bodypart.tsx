@@ -1,6 +1,8 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import GradientButton from '../components/GradientButton';
+import HapticButton from '../components/HapticButton';
 import { colors, shadows, shared } from '../utils/theme';
 
 const BODY_PARTS = [
@@ -21,12 +23,17 @@ export default function BodyPartPicker() {
   const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);
 
-  const toggle = (id: string) => setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  const toggle = (id: string) => setSelected(prev =>
+    prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+  );
   const selectAll = () => setSelected(BODY_PARTS.map(p => p.id));
   const allSelected = selected.length === BODY_PARTS.length;
   const isSelected = (id: string) => selected.includes(id);
 
-  const handleStart = () => router.push({ pathname: '/session', params: { positions, bodyPart: selected.join(',') } });
+  const handleStart = () => router.push({
+    pathname: '/session',
+    params: { positions, bodyPart: selected.join(',') },
+  });
 
   return (
     <>
@@ -42,39 +49,45 @@ export default function BodyPartPicker() {
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.grid}>
             {BODY_PARTS.map(part => (
-              <TouchableOpacity
+              <HapticButton
                 key={part.id}
+                haptic="light"
                 style={[styles.gridCard, isSelected(part.id) && styles.gridCardSelected]}
                 onPress={() => toggle(part.id)}
               >
                 <Text style={styles.gridEmoji}>{part.emoji}</Text>
-                <Text style={[styles.gridName, isSelected(part.id) && styles.gridNameSelected]}>{part.name}</Text>
+                <Text style={[styles.gridName, isSelected(part.id) && styles.gridNameSelected]}>
+                  {part.name}
+                </Text>
                 {isSelected(part.id) && (
                   <View style={shared.checkCircle}>
                     <Text style={shared.checkMark}>✓</Text>
                   </View>
                 )}
-              </TouchableOpacity>
+              </HapticButton>
             ))}
           </View>
 
-          <TouchableOpacity
+          <HapticButton
+            haptic="light"
             style={[shared.secondaryButton, allSelected && styles.allButtonSelected, { marginBottom: 12 }]}
             onPress={allSelected ? () => setSelected([]) : selectAll}
           >
-            <Text style={shared.secondaryButtonText}>{allSelected ? '✦  Deselect All' : '✦  Select All Areas'}</Text>
-          </TouchableOpacity>
+            <Text style={shared.secondaryButtonText}>
+              {allSelected ? '✦  Deselect All' : '✦  Select All Areas'}
+            </Text>
+          </HapticButton>
 
           <View style={{ height: 100 }} />
         </ScrollView>
 
         {selected.length > 0 && (
           <View style={shared.floatingWrapper}>
-            <TouchableOpacity style={shared.primaryButton} onPress={handleStart}>
-              <Text style={shared.primaryButtonText}>
-                Start Stretching{selected.length > 1 ? ` (${selected.length} areas)` : ''} →
-              </Text>
-            </TouchableOpacity>
+            <GradientButton
+              label={`Start Stretching${selected.length > 1 ? ` (${selected.length} areas)` : ''} →`}
+              haptic="medium"
+              onPress={handleStart}
+            />
           </View>
         )}
 

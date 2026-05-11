@@ -1,7 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import GradientButton from '../../components/GradientButton';
+import HapticButton from '../../components/HapticButton';
 import { colors, shadows, shared } from '../../utils/theme';
 
 const positions = [
@@ -17,9 +19,7 @@ export default function PositionPicker() {
   useEffect(() => {
     const checkOnboarded = async () => {
       const onboarded = await AsyncStorage.getItem('onboarded');
-      if (!onboarded) {
-        router.replace('/onboarding' as any);
-      }
+      if (!onboarded) router.replace('/onboarding' as any);
     };
     checkOnboarded();
   }, []);
@@ -39,7 +39,6 @@ export default function PositionPicker() {
       <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
       <SafeAreaView style={styles.container}>
 
-        {/* Hero title */}
         <View style={styles.heroSection}>
           <Text style={styles.question}>Where Are You{'\n'}Right Now?</Text>
           <Text style={styles.subtitle}>Pick one or more positions to get started</Text>
@@ -48,9 +47,10 @@ export default function PositionPicker() {
         {/* Position cards */}
         <View style={styles.cards}>
           {positions.map(pos => (
-            <TouchableOpacity
+            <HapticButton
               key={pos.id}
-              style={[styles.card, isSelected(pos.id) && shared.cardSelected]}
+              haptic="light"
+              style={[styles.card, isSelected(pos.id) && styles.cardSelected]}
               onPress={() => toggle(pos.id)}
             >
               <Text style={styles.cardEmoji}>{pos.label}</Text>
@@ -61,26 +61,26 @@ export default function PositionPicker() {
                   <Text style={shared.checkMark}>✓</Text>
                 </View>
               )}
-            </TouchableOpacity>
+            </HapticButton>
           ))}
         </View>
 
         {/* All 3 button */}
-        <TouchableOpacity
+        <HapticButton
+          haptic="light"
           style={[shared.secondaryButton, allSelected && styles.allButtonSelected, { marginBottom: 12 }]}
           onPress={selectAll}
         >
           <Text style={shared.secondaryButtonText}>✦  All 3 Positions</Text>
-        </TouchableOpacity>
+        </HapticButton>
 
         {/* Start button */}
         {selected.length > 0 && (
-          <TouchableOpacity
-            style={shared.primaryButton}
+          <GradientButton
+            label="Start Stretching →"
+            haptic="medium"
             onPress={() => router.push({ pathname: '/bodypart', params: { positions: selected.join(',') } })}
-          >
-            <Text style={shared.primaryButtonText}>Start Stretching →</Text>
-          </TouchableOpacity>
+          />
         )}
 
       </SafeAreaView>
@@ -89,14 +89,15 @@ export default function PositionPicker() {
 }
 
 const styles = StyleSheet.create({
-  container:        { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24, justifyContent: 'center' },
-  heroSection:      { alignItems: 'center', marginBottom: 48 },
-  question:         { fontSize: 36, fontWeight: '800', color: colors.textDark, textAlign: 'center', lineHeight: 44, marginBottom: 12 },
-  subtitle:         { fontSize: 15, color: colors.textMid, textAlign: 'center' },
-  cards:            { flexDirection: 'row', gap: 10, marginBottom: 14 },
-  card:             { flex: 1, backgroundColor: colors.white, borderRadius: 20, paddingVertical: 28, paddingHorizontal: 8, alignItems: 'center', borderWidth: 2, borderColor: 'transparent', position: 'relative', ...shadows.card },
-  cardEmoji:        { fontSize: 30, marginBottom: 10 },
-  cardLabel:        { fontSize: 13, fontWeight: '700', color: colors.textDark, textAlign: 'center', marginBottom: 4 },
-  cardDesc:         { fontSize: 11, color: colors.textMid, textAlign: 'center' },
-  allButtonSelected:{ borderColor: colors.accent, backgroundColor: colors.accentLight },
+  container:         { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24, justifyContent: 'center' },
+  heroSection:       { alignItems: 'center', marginBottom: 48 },
+  question:          { fontSize: 36, fontWeight: '800', color: colors.textDark, textAlign: 'center', lineHeight: 44, marginBottom: 12 },
+  subtitle:          { fontSize: 15, color: colors.textMid, textAlign: 'center' },
+  cards:             { flexDirection: 'row', gap: 10, marginBottom: 14 },
+  card:              { flex: 1, backgroundColor: colors.white, borderRadius: 20, paddingVertical: 28, paddingHorizontal: 8, alignItems: 'center', borderWidth: 2, borderColor: 'transparent', position: 'relative', ...shadows.card },
+  cardSelected:      { borderColor: colors.accent, backgroundColor: colors.accentLight },
+  cardEmoji:         { fontSize: 30, marginBottom: 10 },
+  cardLabel:         { fontSize: 13, fontWeight: '700', color: colors.textDark, textAlign: 'center', marginBottom: 4 },
+  cardDesc:          { fontSize: 11, color: colors.textMid, textAlign: 'center' },
+  allButtonSelected: { borderColor: colors.accent, backgroundColor: colors.accentLight },
 });
