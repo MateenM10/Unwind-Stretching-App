@@ -214,9 +214,16 @@ export default function SessionScreen() {
           {/* Name + info */}
           <View style={styles.nameRow}>
             <Text style={styles.name}>{current.name}</Text>
-            <TouchableOpacity style={styles.infoButton} onPress={() => setShowInfo(true)}>
-              <Text style={styles.infoIcon}>ⓘ</Text>
-            </TouchableOpacity>
+            <TouchableOpacity
+  style={styles.infoButton}
+  onPress={() => {
+    Speech.stop();
+    setIsRunning(false);
+    setShowInfo(true);
+  }}
+>
+  <Text style={styles.infoIcon}>ⓘ</Text>
+</TouchableOpacity>
           </View>
 
           {/* Tip */}
@@ -281,12 +288,15 @@ export default function SessionScreen() {
 
         {/* Info sheet */}
         <StretchInfoSheet
-          visible={showInfo}
-          onClose={() => setShowInfo(false)}
-          stretchId={current.id}
-          stretchName={current.name}
-          muscle={current.muscle}
-        />
+  visible={showInfo}
+  onClose={() => {
+    setShowInfo(false);
+    setIsRunning(true);
+  }}
+  stretchId={current.id}
+  stretchName={current.name}
+  muscle={current.muscle}
+/>
 
         {/* Pause modal */}
         <PauseModal

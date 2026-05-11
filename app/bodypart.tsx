@@ -1,6 +1,6 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
-import { SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { Animated, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import GradientButton from '../components/GradientButton';
 import HapticButton from '../components/HapticButton';
 import { colors, shadows, shared } from '../utils/theme';
@@ -18,6 +18,47 @@ const BODY_PARTS = [
   { id: 'ankles',     emoji: '🔁',  name: 'Ankles'     },
 ];
 
+function BodyPartCard({ part, isSelected, onPress }: {
+  part: typeof BODY_PARTS[0];
+  isSelected: boolean;
+  onPress: () => void;
+}) {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const handlePress = () => {
+    Animated.sequence([
+      Animated.timing(scaleAnim, { toValue: 0.94, duration: 80, useNativeDriver: true }),
+      Animated.timing(scaleAnim, { toValue: 1,    duration: 120, useNativeDriver: true }),
+    ]).start();
+    onPress();
+  };
+
+  return (
+    <Animated.View style={[styles.cardWrapper, { transform: [{ scale: scaleAnim }] }]}>
+      <HapticButton
+        haptic="light"
+        style={[
+          styles.gridCard,
+          {
+            borderColor: isSelected ? colors.accent : 'transparent',
+            backgroundColor: isSelected ? colors.accentLight : colors.white,
+          },
+        ]}
+        onPress={handlePress}
+      >
+        <Text style={styles.gridEmoji}>{part.emoji}</Text>
+        <Text style={[styles.gridName, { color: isSelected ? colors.accent : colors.textDark }]}>
+          {part.name}
+        </Text>
+        {/* Always rendered — invisible when unselected */}
+        <View style={[styles.checkCircle, { opacity: isSelected ? 1 : 0 }]}>
+          <Text style={styles.checkMark}>✓</Text>
+        </View>
+      </HapticButton>
+    </Animated.View>
+  );
+}
+
 export default function BodyPartPicker() {
   const { positions } = useLocalSearchParams<{ positions: string }>();
   const router = useRouter();
@@ -26,9 +67,9 @@ export default function BodyPartPicker() {
   const toggle = (id: string) => setSelected(prev =>
     prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
   );
-  const selectAll = () => setSelected(BODY_PARTS.map(p => p.id));
+  const selectAll  = () => setSelected(BODY_PARTS.map(p => p.id));
   const allSelected = selected.length === BODY_PARTS.length;
-  const isSelected = (id: string) => selected.includes(id);
+  const isSelected  = (id: string) => selected.includes(id);
 
   const handleStart = () => router.push({
     pathname: '/session',
@@ -49,31 +90,27 @@ export default function BodyPartPicker() {
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.grid}>
             {BODY_PARTS.map(part => (
-              <HapticButton
+              <BodyPartCard
                 key={part.id}
-                haptic="light"
-                style={[styles.gridCard, isSelected(part.id) && styles.gridCardSelected]}
+                part={part}
+                isSelected={isSelected(part.id)}
                 onPress={() => toggle(part.id)}
-              >
-                <Text style={styles.gridEmoji}>{part.emoji}</Text>
-                <Text style={[styles.gridName, isSelected(part.id) && styles.gridNameSelected]}>
-                  {part.name}
-                </Text>
-                {isSelected(part.id) && (
-                  <View style={shared.checkCircle}>
-                    <Text style={shared.checkMark}>✓</Text>
-                  </View>
-                )}
-              </HapticButton>
+              />
             ))}
           </View>
 
           <HapticButton
             haptic="light"
-            style={[shared.secondaryButton, allSelected && styles.allButtonSelected, { marginBottom: 12 }]}
+            style={[
+              styles.allButton,
+              {
+                borderColor: allSelected ? colors.accent : colors.border,
+                backgroundColor: allSelected ? colors.accentLight : 'transparent',
+              }
+            ]}
             onPress={allSelected ? () => setSelected([]) : selectAll}
           >
-            <Text style={shared.secondaryButtonText}>
+            <Text style={styles.allButtonText}>
               {allSelected ? '✦  Deselect All' : '✦  Select All Areas'}
             </Text>
           </HapticButton>
@@ -97,12 +134,14 @@ export default function BodyPartPicker() {
 }
 
 const styles = StyleSheet.create({
-  heroSection:       { alignItems: 'center', marginBottom: 28 },
-  grid:              { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 14 },
-  gridCard:          { width: '47.5%', backgroundColor: colors.white, borderRadius: 16, paddingVertical: 24, paddingHorizontal: 8, alignItems: 'center', borderWidth: 2, borderColor: 'transparent', position: 'relative', ...shadows.card },
-  gridCardSelected:  { borderColor: colors.accent, backgroundColor: colors.accentLight },
-  gridEmoji:         { fontSize: 30, marginBottom: 8 },
-  gridName:          { fontSize: 14, fontWeight: '600', color: colors.textDark, textAlign: 'center' },
-  gridNameSelected:  { color: colors.accent },
-  allButtonSelected: { borderColor: colors.accent, backgroundColor: colors.accentLight },
+  heroSection:  { alignItems: 'center', marginBottom: 28 },
+  grid:         { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 14 },
+  cardWrapper:  { width: '47.5%' },
+  gridCard:     { borderRadius: 16, paddingVertical: 24, paddingHorizontal: 8, alignItems: 'center', borderWidth: 2, position: 'relative', ...shadows.card },
+  gridEmoji:    { fontSize: 30, marginBottom: 8 },
+  gridName:     { fontSize: 14, fontWeight: '600', textAlign: 'center' },
+  checkCircle:  { position: 'absolute', top: 8, right: 8, width: 20, height: 20, borderRadius: 10, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center' },
+  checkMark:    { color: colors.white, fontSize: 11, fontWeight: '700' },
+  allButton:    { borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 2, alignItems: 'center' },
+  allButtonText:{ fontSize: 15, fontWeight: '600', color: colors.accent },
 });

@@ -1,16 +1,50 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { SafeAreaView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Animated, SafeAreaView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import GradientButton from '../../components/GradientButton';
 import HapticButton from '../../components/HapticButton';
-import { colors, shadows, shared } from '../../utils/theme';
+import { colors, shadows } from '../../utils/theme';
 
 const positions = [
   { id: 'couch',    label: '🛋️',  name: 'On the Couch',  desc: 'Seated stretches'  },
   { id: 'standing', label: '🧍',  name: 'Standing',      desc: 'Upright stretches' },
   { id: 'lying',    label: '🛏️',  name: 'Lying Down',    desc: 'Floor stretches'   },
 ];
+
+function PositionCard({ pos, isSelected, onPress }: {
+  pos: typeof positions[0];
+  isSelected: boolean;
+  onPress: () => void;
+}) {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const handlePress = () => {
+    Animated.sequence([
+      Animated.timing(scaleAnim, { toValue: 0.96, duration: 80, useNativeDriver: true }),
+      Animated.timing(scaleAnim, { toValue: 1,    duration: 120, useNativeDriver: true }),
+    ]).start();
+    onPress();
+  };
+
+  return (
+    <Animated.View style={[styles.cardWrapper, { transform: [{ scale: scaleAnim }] }]}>
+      <HapticButton
+        haptic="light"
+        style={[styles.card, { borderColor: isSelected ? colors.accent : 'transparent', backgroundColor: isSelected ? colors.accentLight : colors.white }]}
+        onPress={handlePress}
+      >
+        <Text style={styles.cardEmoji}>{pos.label}</Text>
+        <Text style={[styles.cardLabel, { color: isSelected ? colors.accent : colors.textDark }]}>{pos.name}</Text>
+        <Text style={styles.cardDesc}>{pos.desc}</Text>
+        {/* Always rendered — just invisible when unselected */}
+        <View style={[styles.checkCircle, { opacity: isSelected ? 1 : 0 }]}>
+          <Text style={styles.checkMark}>✓</Text>
+        </View>
+      </HapticButton>
+    </Animated.View>
+  );
+}
 
 export default function PositionPicker() {
   const [selected, setSelected] = useState<string[]>([]);
@@ -44,37 +78,25 @@ export default function PositionPicker() {
           <Text style={styles.subtitle}>Pick one or more positions to get started</Text>
         </View>
 
-        {/* Position cards */}
         <View style={styles.cards}>
           {positions.map(pos => (
-            <HapticButton
+            <PositionCard
               key={pos.id}
-              haptic="light"
-              style={[styles.card, isSelected(pos.id) && styles.cardSelected]}
+              pos={pos}
+              isSelected={isSelected(pos.id)}
               onPress={() => toggle(pos.id)}
-            >
-              <Text style={styles.cardEmoji}>{pos.label}</Text>
-              <Text style={styles.cardLabel}>{pos.name}</Text>
-              <Text style={styles.cardDesc}>{pos.desc}</Text>
-              {isSelected(pos.id) && (
-                <View style={shared.checkCircle}>
-                  <Text style={shared.checkMark}>✓</Text>
-                </View>
-              )}
-            </HapticButton>
+            />
           ))}
         </View>
 
-        {/* All 3 button */}
         <HapticButton
           haptic="light"
-          style={[shared.secondaryButton, allSelected && styles.allButtonSelected, { marginBottom: 12 }]}
+          style={[styles.allButton, { borderColor: allSelected ? colors.accent : colors.border, backgroundColor: allSelected ? colors.accentLight : 'transparent' }]}
           onPress={selectAll}
         >
-          <Text style={shared.secondaryButtonText}>✦  All 3 Positions</Text>
+          <Text style={[styles.allButtonText, { color: colors.accent }]}>✦  All 3 Positions</Text>
         </HapticButton>
 
-        {/* Start button */}
         {selected.length > 0 && (
           <GradientButton
             label="Start Stretching →"
@@ -89,15 +111,18 @@ export default function PositionPicker() {
 }
 
 const styles = StyleSheet.create({
-  container:         { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24, justifyContent: 'center' },
-  heroSection:       { alignItems: 'center', marginBottom: 48 },
-  question:          { fontSize: 36, fontWeight: '800', color: colors.textDark, textAlign: 'center', lineHeight: 44, marginBottom: 12 },
-  subtitle:          { fontSize: 15, color: colors.textMid, textAlign: 'center' },
-  cards:             { flexDirection: 'row', gap: 10, marginBottom: 14 },
-  card:              { flex: 1, backgroundColor: colors.white, borderRadius: 20, paddingVertical: 28, paddingHorizontal: 8, alignItems: 'center', borderWidth: 2, borderColor: 'transparent', position: 'relative', ...shadows.card },
-  cardSelected:      { borderColor: colors.accent, backgroundColor: colors.accentLight },
-  cardEmoji:         { fontSize: 30, marginBottom: 10 },
-  cardLabel:         { fontSize: 13, fontWeight: '700', color: colors.textDark, textAlign: 'center', marginBottom: 4 },
-  cardDesc:          { fontSize: 11, color: colors.textMid, textAlign: 'center' },
-  allButtonSelected: { borderColor: colors.accent, backgroundColor: colors.accentLight },
+  container:     { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24, justifyContent: 'center' },
+  heroSection:   { alignItems: 'center', marginBottom: 48 },
+  question:      { fontSize: 36, fontWeight: '800', color: colors.textDark, textAlign: 'center', lineHeight: 44, marginBottom: 12 },
+  subtitle:      { fontSize: 15, color: colors.textMid, textAlign: 'center' },
+  cards:         { flexDirection: 'row', gap: 10, marginBottom: 14 },
+  cardWrapper:   { flex: 1 },
+  card:          { borderRadius: 20, paddingVertical: 28, paddingHorizontal: 8, alignItems: 'center', borderWidth: 2, position: 'relative', ...shadows.card },
+  cardEmoji:     { fontSize: 30, marginBottom: 10 },
+  cardLabel:     { fontSize: 13, fontWeight: '700', textAlign: 'center', marginBottom: 4 },
+  cardDesc:      { fontSize: 11, color: colors.textMid, textAlign: 'center' },
+  checkCircle:   { position: 'absolute', top: 8, right: 8, width: 20, height: 20, borderRadius: 10, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center' },
+  checkMark:     { color: colors.white, fontSize: 11, fontWeight: '700' },
+  allButton:     { borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 2, alignItems: 'center' },
+  allButtonText: { fontSize: 15, fontWeight: '600' },
 });
