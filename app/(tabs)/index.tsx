@@ -33,6 +33,19 @@ const getGreeting = () => {
   return 'Good evening';
 };
 
+const getLastStretchedLabel = (lastSessionDate: string | null): string => {
+  if (!lastSessionDate) return 'No sessions yet';
+  const today = new Date().toISOString().split('T')[0];
+  if (lastSessionDate === today) return 'Stretched today ✓';
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (lastSessionDate === yesterday.toISOString().split('T')[0]) return 'Last stretched yesterday';
+  const diff = Math.floor(
+    (new Date(today).getTime() - new Date(lastSessionDate).getTime()) / (1000 * 60 * 60 * 24)
+  );
+  return `Last stretched ${diff} days ago`;
+};
+
 function PositionCard({ pos, isSelected, onPress }: {
   pos: typeof positions[0];
   isSelected: boolean;
@@ -72,11 +85,13 @@ function PositionCard({ pos, isSelected, onPress }: {
 }
 
 export default function HomeScreen() {
-  const [selected, setSelected] = useState<string[]>([]);
-  const [streak, setStreak]     = useState(0);
-  const [total, setTotal]       = useState(0);
-  const [bestStreak, setBest]   = useState(0);
-  const [motivation, setMotivation] = useState(MOTIVATIONS[0]);
+  const [selected, setSelected]         = useState<string[]>([]);
+  const [streak, setStreak]             = useState(0);
+  const [total, setTotal]               = useState(0);
+  const [bestStreak, setBest]           = useState(0);
+  const [motivation, setMotivation]     = useState(MOTIVATIONS[0]);
+  const [userName, setUserName]         = useState('');
+  const [lastSession, setLastSession]   = useState<string | null>(null);
   const router = useRouter();
 
   useFocusEffect(
@@ -87,10 +102,15 @@ export default function HomeScreen() {
           router.replace('/onboarding' as any);
           return;
         }
-        const data = await getStreakData();
+        const [data, name] = await Promise.all([
+          getStreakData(),
+          AsyncStorage.getItem('userName'),
+        ]);
         setStreak(data.currentStreak);
         setTotal(data.totalSessions);
         setBest(data.longestStreak);
+        setLastSession(data.lastSessionDate);
+        setUserName(name ?? '');
         setMotivation(MOTIVATIONS[Math.floor(Math.random() * MOTIVATIONS.length)]);
       };
       init();
@@ -104,6 +124,10 @@ export default function HomeScreen() {
   const isSelected = (id: string) => selected.includes(id);
   const allSelected = selected.length === positions.length;
 
+  const greetingName = userName.trim() ? `, ${userName.trim().split(' ')[0]}` : '';
+  const lastStretchedLabel = getLastStretchedLabel(lastSession);
+  const stretchedToday = lastSession === new Date().toISOString().split('T')[0];
+
   return (
     <>
       <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
@@ -114,9 +138,16 @@ export default function HomeScreen() {
         <SafeAreaView style={styles.container}>
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
 
-            {/* Greeting */}
+            {/* Hero header */}
             <View style={styles.header}>
-              <Text style={styles.greeting}>{getGreeting()}</Text>
+              <Text style={styles.greeting}>{getGreeting()}{greetingName}</Text>
+              <View style={styles.heroBadgeRow}>
+                <View style={[styles.lastStretchedBadge, stretchedToday && styles.lastStretchedBadgeSuccess]}>
+                  <Text style={[styles.lastStretchedText, stretchedToday && styles.lastStretchedTextSuccess]}>
+                    {lastStretchedLabel}
+                  </Text>
+                </View>
+              </View>
               <Text style={styles.tagline}>{motivation}</Text>
             </View>
 
@@ -205,9 +236,31 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   gradient:        { flex: 1 },
   container:       { flex: 1, paddingHorizontal: 20 },
+
   header:          { marginTop: 12, marginBottom: 20 },
   greeting:        { fontSize: 32, fontWeight: '800', color: colors.textDark, letterSpacing: -0.5 },
-  tagline:         { fontSize: 14, color: colors.textMid, marginTop: 4, fontStyle: 'italic' },
+  heroBadgeRow:    { flexDirection: 'row', marginTop: 8, marginBottom: 6 },
+  lastStretchedBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  lastStretchedBadgeSuccess: {
+    backgroundColor: '#EDFAF2',
+    borderColor: '#6FCF97',
+  },
+  lastStretchedText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.textMid,
+  },
+  lastStretchedTextSuccess: {
+    color: '#27AE60',
+  },
+  tagline:         { fontSize: 14, color: colors.textMid, fontStyle: 'italic' },
 
   streakHero:      { borderRadius: 24, padding: 22, flexDirection: 'row', alignItems: 'center', marginBottom: 14, shadowColor: '#E8924A', shadowOpacity: 0.4, shadowRadius: 18, shadowOffset: { width: 0, height: 8 }, elevation: 8 },
   streakLeft:      { flex: 1 },

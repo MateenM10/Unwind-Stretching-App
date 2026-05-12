@@ -3,6 +3,7 @@ import * as Speech from 'expo-speech';
 import { useEffect, useRef, useState } from 'react';
 import {
   Animated,
+  Easing,
   SafeAreaView,
   StatusBar,
   StyleSheet,
@@ -75,7 +76,6 @@ export default function SessionScreen() {
     Speech.speak(text, { rate: 0.9, pitch: 1.0 });
   };
 
-  // Animate card in when stretch changes
   useEffect(() => {
     cardAnim.setValue(0);
     Animated.spring(cardAnim, {
@@ -92,6 +92,7 @@ export default function SessionScreen() {
     endSpokenRef.current     = false;
     lastBreathRef.current    = '';
     setTipExpanded(false);
+    tipAnim.setValue(0);
     speak(`${current.name}. ${(current as any).tip ?? ''}`);
   }, [index, voiceEnabled]);
 
@@ -146,14 +147,13 @@ export default function SessionScreen() {
     }
   }, [timeLeft]);
 
-  // Tip expand animation
   const toggleTip = () => {
     const toValue = tipExpanded ? 0 : 1;
     setTipExpanded(!tipExpanded);
-    Animated.spring(tipAnim, {
+    Animated.timing(tipAnim, {
       toValue,
-      tension: 80,
-      friction: 10,
+      duration: 220,
+      easing: toValue === 1 ? Easing.out(Easing.cubic) : Easing.in(Easing.cubic),
       useNativeDriver: false,
     }).start();
   };
@@ -261,7 +261,7 @@ export default function SessionScreen() {
           {index + 1} <Text style={styles.counterOf}>of {stretches.length}</Text>
         </Text>
 
-        {/* Main card — animated in on each stretch */}
+        {/* Main card */}
         <Animated.View style={[styles.card, cardStyle]}>
 
           {/* Muscle + name row */}
@@ -298,7 +298,7 @@ export default function SessionScreen() {
           {/* Divider */}
           <View style={styles.divider} />
 
-          {/* Timer — the star */}
+          {/* Timer */}
           <View style={styles.timerSection}>
             <PulsingTimer
               stretchId={current.id}
@@ -308,7 +308,6 @@ export default function SessionScreen() {
               isBreathingIn={isBreathingIn}
             />
 
-            {/* Breathing cue — fixed height */}
             <Text style={[
               styles.breathingCue,
               { color: isBreathingIn ? colors.accent : colors.textMid, opacity: isRunning && timeLeft > 0 ? 1 : 0 }
@@ -335,7 +334,7 @@ export default function SessionScreen() {
 
         </Animated.View>
 
-        {/* Feedback row — outside the card */}
+        {/* Feedback row */}
         <View style={styles.feedbackRow}>
           <TouchableOpacity
             style={[styles.feedbackButton, isFavourited && styles.feedbackButtonActive]}
@@ -380,63 +379,52 @@ export default function SessionScreen() {
 }
 
 const styles = StyleSheet.create({
-  container:           { flex: 1, backgroundColor: colors.background, paddingHorizontal: 20, paddingTop: 8 },
+  container:            { flex: 1, backgroundColor: colors.background, paddingHorizontal: 20, paddingTop: 8 },
 
-  // Top bar
-  topBar:              { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 6 },
-  progressTrack:       { flex: 1, height: 5, backgroundColor: colors.border, borderRadius: 3, overflow: 'hidden' },
-  progressFill:        { height: 5, backgroundColor: colors.accent, borderRadius: 3 },
-  voiceToggle:         { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  voiceEmoji:          { fontSize: 16 },
+  topBar:               { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 6 },
+  progressTrack:        { flex: 1, height: 5, backgroundColor: colors.border, borderRadius: 3, overflow: 'hidden' },
+  progressFill:         { height: 5, backgroundColor: colors.accent, borderRadius: 3 },
+  voiceToggle:          { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  voiceEmoji:           { fontSize: 16 },
 
-  // Counter
-  counter:             { fontSize: 20, fontWeight: '800', color: colors.textDark, marginBottom: 14 },
-  counterOf:           { fontSize: 16, fontWeight: '400', color: colors.textMid },
+  counter:              { fontSize: 20, fontWeight: '800', color: colors.textDark, marginBottom: 14 },
+  counterOf:            { fontSize: 16, fontWeight: '400', color: colors.textMid },
 
-  // Card
-  card:                { backgroundColor: colors.white, borderRadius: 28, padding: 22, marginBottom: 14, ...shadows.accent },
+  card:                 { backgroundColor: colors.white, borderRadius: 28, padding: 22, marginBottom: 14, ...shadows.accent },
 
-  // Name section
-  nameSection:         { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 },
-  nameLeft:            { flex: 1, paddingRight: 12 },
-  muscle:              { fontSize: 11, fontWeight: '700', color: colors.accent, letterSpacing: 1.8, marginBottom: 4 },
-  name:                { fontSize: 24, fontWeight: '800', color: colors.textDark, lineHeight: 28 },
-  infoButton:          { width: 30, height: 30, borderRadius: 15, backgroundColor: colors.background, borderWidth: 1.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center', marginTop: 4 },
-  infoIcon:            { fontSize: 14, color: colors.accent, fontWeight: '700' },
+  nameSection:          { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 },
+  nameLeft:             { flex: 1, paddingRight: 12 },
+  muscle:               { fontSize: 11, fontWeight: '700', color: colors.accent, letterSpacing: 1.8, marginBottom: 4 },
+  name:                 { fontSize: 24, fontWeight: '800', color: colors.textDark, lineHeight: 28 },
+  infoButton:           { width: 30, height: 30, borderRadius: 15, backgroundColor: colors.background, borderWidth: 1.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center', marginTop: 4 },
+  infoIcon:             { fontSize: 14, color: colors.accent, fontWeight: '700' },
 
-  // Tip
-  tipHeader:           { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8, paddingHorizontal: 12, backgroundColor: colors.background, borderRadius: 12, marginBottom: 0 },
-  tipHeaderText:       { fontSize: 13, fontWeight: '600', color: colors.textMid },
-  tipChevron:          { fontSize: 16, color: colors.textLight },
-  tipBody:             { overflow: 'hidden', paddingHorizontal: 12 },
-  tipText:             { fontSize: 13, color: colors.textMid, lineHeight: 20, paddingTop: 8 },
+  tipHeader:            { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 8, paddingHorizontal: 12, backgroundColor: colors.background, borderRadius: 12, marginBottom: 0 },
+  tipHeaderText:        { fontSize: 13, fontWeight: '600', color: colors.textMid },
+  tipChevron:           { fontSize: 16, color: colors.textLight },
+  tipBody:              { overflow: 'hidden', paddingHorizontal: 12 },
+  tipText:              { fontSize: 13, color: colors.textMid, lineHeight: 20, paddingTop: 8 },
 
-  // Divider
-  divider:             { height: 1, backgroundColor: colors.border, marginVertical: 16 },
+  divider:              { height: 1, backgroundColor: colors.border, marginVertical: 16 },
 
-  // Timer
-  timerSection:        { alignItems: 'center', paddingVertical: 8 },
-  breathingCue:        { fontSize: 15, fontWeight: '600', letterSpacing: 0.5, marginTop: 8, height: 22 },
-  doneText:            { color: colors.success, fontSize: 14, fontWeight: '600', marginTop: 8 },
+  timerSection:         { alignItems: 'center', paddingVertical: 8 },
+  breathingCue:         { fontSize: 15, fontWeight: '600', letterSpacing: 0.5, marginTop: 8, height: 22 },
+  doneText:             { color: colors.success, fontSize: 14, fontWeight: '600', marginTop: 8 },
 
-  // Pause
-  pauseButton:         { marginTop: 16, paddingVertical: 11, borderRadius: 20, borderWidth: 1.5, borderColor: colors.border, alignItems: 'center' },
-  pauseText:           { color: colors.textMid, fontSize: 14, fontWeight: '600' },
+  pauseButton:          { marginTop: 16, paddingVertical: 11, borderRadius: 20, borderWidth: 1.5, borderColor: colors.border, alignItems: 'center' },
+  pauseText:            { color: colors.textMid, fontSize: 14, fontWeight: '600' },
 
-  // Feedback
-  feedbackRow:         { flexDirection: 'row', gap: 10, marginBottom: 14 },
-  feedbackButton:      { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderRadius: 16, backgroundColor: colors.white, borderWidth: 1.5, borderColor: colors.border },
-  feedbackButtonActive:{ borderColor: colors.accent, backgroundColor: colors.accentLight },
-  feedbackEmoji:       { fontSize: 16 },
-  feedbackText:        { color: colors.textMid, fontSize: 13, fontWeight: '600' },
-  feedbackTextActive:  { color: colors.accent },
+  feedbackRow:          { flexDirection: 'row', gap: 10, marginBottom: 14 },
+  feedbackButton:       { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderRadius: 16, backgroundColor: colors.white, borderWidth: 1.5, borderColor: colors.border },
+  feedbackButtonActive: { borderColor: colors.accent, backgroundColor: colors.accentLight },
+  feedbackEmoji:        { fontSize: 16 },
+  feedbackText:         { color: colors.textMid, fontSize: 13, fontWeight: '600' },
+  feedbackTextActive:   { color: colors.accent },
 
-  // Next
-  nextButton:          { backgroundColor: colors.accent, borderRadius: 18, paddingVertical: 18, alignItems: 'center', shadowColor: colors.accent, shadowOpacity: 0.3, shadowRadius: 12, shadowOffset: { width: 0, height: 5 }, elevation: 5 },
-  nextText:            { color: colors.white, fontSize: 17, fontWeight: '800', letterSpacing: 0.3 },
+  nextButton:           { backgroundColor: colors.accent, borderRadius: 18, paddingVertical: 18, alignItems: 'center', shadowColor: colors.accent, shadowOpacity: 0.3, shadowRadius: 12, shadowOffset: { width: 0, height: 5 }, elevation: 5 },
+  nextText:             { color: colors.white, fontSize: 17, fontWeight: '800', letterSpacing: 0.3 },
 
-  // Empty
-  emptyText:           { fontSize: 16, color: colors.textMid, textAlign: 'center', marginBottom: 24, marginTop: 60 },
-  backButton:          { backgroundColor: colors.accent, borderRadius: 16, padding: 18, alignItems: 'center', marginHorizontal: 24 },
-  backButtonText:      { color: colors.white, fontSize: 16, fontWeight: '700' },
+  emptyText:            { fontSize: 16, color: colors.textMid, textAlign: 'center', marginBottom: 24, marginTop: 60 },
+  backButton:           { backgroundColor: colors.accent, borderRadius: 16, padding: 18, alignItems: 'center', marginHorizontal: 24 },
+  backButtonText:       { color: colors.white, fontSize: 16, fontWeight: '700' },
 });
