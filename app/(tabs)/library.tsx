@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
@@ -40,7 +41,7 @@ export default function LibraryScreen() {
     }, [])
   );
 
-  const handleFavourite  = async (id: string) => {
+  const handleFavourite = async (id: string) => {
     const updated = await toggleFavourite(id);
     setFavourites(updated);
   };
@@ -81,8 +82,15 @@ export default function LibraryScreen() {
                 style={[styles.filterTab, filter === f && styles.filterTabActive]}
                 onPress={() => setFilter(f)}
               >
+                {f === 'favourites' && (
+                  <Ionicons
+                    name="heart"
+                    size={13}
+                    color={filter === f ? colors.white : colors.textMid}
+                  />
+                )}
                 <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>
-                  {f === 'all' ? 'All' : '❤️  Favourites'}
+                  {f === 'all' ? 'All' : 'Favourites'}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -101,13 +109,17 @@ export default function LibraryScreen() {
                     <Text style={styles.sectionTitle}>{MUSCLE_LABELS[muscle]}</Text>
                     <View style={styles.sectionRight}>
                       <Text style={styles.sectionCount}>{stretches.length}</Text>
-                      <Text style={styles.sectionChevron}>{isCollapsed ? '›' : '⌄'}</Text>
+                      <Ionicons
+                        name={isCollapsed ? 'chevron-forward' : 'chevron-down'}
+                        size={16}
+                        color={colors.textLight}
+                      />
                     </View>
                   </TouchableOpacity>
 
                   {!isCollapsed && stretches.map(stretch => {
-                    const isFav       = favourites.includes(stretch.id);
-                    const weightInfo  = getWeightLabel(stretch.id);
+                    const isFav      = favourites.includes(stretch.id);
+                    const weightInfo = getWeightLabel(stretch.id);
                     return (
                       <View key={stretch.id} style={styles.card}>
                         <View style={styles.cardLeft}>
@@ -118,8 +130,12 @@ export default function LibraryScreen() {
                             <Text style={[styles.cardWeight, { color: weightInfo.color }]}>{weightInfo.label}</Text>
                           </View>
                         </View>
-                        <TouchableOpacity onPress={() => handleFavourite(stretch.id)}>
-                          <Text style={styles.heartIcon}>{isFav ? '❤️' : '🤍'}</Text>
+                        <TouchableOpacity onPress={() => handleFavourite(stretch.id)} style={styles.heartButton}>
+                          <Ionicons
+                            name={isFav ? 'heart' : 'heart-outline'}
+                            size={22}
+                            color={isFav ? colors.accent : colors.textLight}
+                          />
                         </TouchableOpacity>
                       </View>
                     );
@@ -128,7 +144,7 @@ export default function LibraryScreen() {
               );
             })}
 
-            <View style={{ height: 40 }} />
+            <View style={{ height: 120 }} />
           </ScrollView>
         </SafeAreaView>
       </LinearGradient>
@@ -140,7 +156,7 @@ const styles = StyleSheet.create({
   container:        { flex: 1, padding: 24 },
   subtitleLeft:     { textAlign: 'left', marginBottom: 20 },
   filterRow:        { flexDirection: 'row', gap: 10, marginBottom: 20 },
-  filterTab:        { paddingVertical: 8, paddingHorizontal: 18, borderRadius: 20, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.white },
+  filterTab:        { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 8, paddingHorizontal: 18, borderRadius: 20, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.white },
   filterTabActive:  { backgroundColor: colors.accent, borderColor: colors.accent },
   filterText:       { color: colors.textMid, fontSize: 14, fontWeight: '600' },
   filterTextActive: { color: colors.white },
@@ -149,7 +165,6 @@ const styles = StyleSheet.create({
   sectionTitle:     { fontSize: 15, fontWeight: '700', color: colors.textDark },
   sectionRight:     { flexDirection: 'row', alignItems: 'center', gap: 8 },
   sectionCount:     { fontSize: 12, color: colors.textLight, fontWeight: '600' },
-  sectionChevron:   { fontSize: 18, color: colors.textLight },
   card:             { backgroundColor: colors.white, borderRadius: 14, padding: 16, marginBottom: 8, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', ...shadows.card },
   cardLeft:         { flex: 1 },
   cardName:         { color: colors.textDark, fontSize: 15, fontWeight: '600', marginBottom: 4 },
@@ -157,5 +172,5 @@ const styles = StyleSheet.create({
   cardDuration:     { color: colors.textLight, fontSize: 12 },
   cardDot:          { color: colors.textLight, fontSize: 12 },
   cardWeight:       { fontSize: 12, fontWeight: '500' },
-  heartIcon:        { fontSize: 22 },
+  heartButton:      { padding: 4 },
 });

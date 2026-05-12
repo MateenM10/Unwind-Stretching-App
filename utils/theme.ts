@@ -19,6 +19,26 @@ export const colors = {
 };
 
 // ————————————————————————————
+// GRADIENT
+// ————————————————————————————
+export const gradient = {
+  screen: ['#FAF7F2', '#F5EDE0'] as const,
+};
+
+// ————————————————————————————
+// TYPE SCALE — dramatic size contrast creates visual rhythm
+// ————————————————————————————
+export const type = {
+  display:  { fontSize: 56, fontWeight: '900' as const, letterSpacing: -1.5 },
+  hero:     { fontSize: 36, fontWeight: '800' as const, letterSpacing: -0.5 },
+  title:    { fontSize: 28, fontWeight: '800' as const, letterSpacing: -0.3 },
+  heading:  { fontSize: 20, fontWeight: '700' as const },
+  body:     { fontSize: 15, fontWeight: '400' as const, lineHeight: 22 },
+  label:    { fontSize: 13, fontWeight: '600' as const },
+  caption:  { fontSize: 11, fontWeight: '700' as const, letterSpacing: 1.5 },
+};
+
+// ————————————————————————————
 // SHARED SHADOWS
 // ————————————————————————————
 export const shadows = {
@@ -45,16 +65,11 @@ export const shadows = {
   },
 };
 
-// Add to your existing theme.ts exports
 export const motivationColors = {
-  flame:    '#FF8C42',
-  streak:   '#E8924A',
-  energy:   '#F5B947',
-  cool:     '#7DAEA0',
-};
-
-export const gradient = {
-  screen: ['#FAF7F2', '#F5EDE0'] as const,
+  flame:  '#FF8C42',
+  streak: '#E8924A',
+  energy: '#F5B947',
+  cool:   '#7DAEA0',
 };
 
 // ————————————————————————————
@@ -65,34 +80,29 @@ export const shared = StyleSheet.create({
   // Containers
   screen: {
     flex: 1,
-    backgroundColor: '#FAF7F2',
     padding: 24,
   },
 
-  // Typography
+  // Typography — uses the type scale above
   heroTitle: {
-    fontSize: 32,
-    fontWeight: '800',
+    ...type.hero,
     color: '#2C2416',
     textAlign: 'center',
     marginBottom: 8,
   },
   screenTitle: {
-    fontSize: 28,
-    fontWeight: '700',
+    ...type.title,
     color: '#2C2416',
-    marginBottom: 6,
+    marginBottom: 4,
   },
   subtitle: {
-    fontSize: 15,
+    ...type.body,
     color: '#9B8573',
     textAlign: 'center',
   },
   sectionLabel: {
-    fontSize: 11,
-    fontWeight: '700',
+    ...type.caption,
     color: '#C4B5A5',
-    letterSpacing: 1.5,
     marginBottom: 12,
   },
 

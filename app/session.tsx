@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import * as Speech from 'expo-speech';
@@ -220,9 +221,15 @@ export default function SessionScreen() {
             <View style={styles.progressTrack}>
               <View style={[styles.progressFill, { width: `${progress}%` }]} />
             </View>
-            <Text style={styles.counter}>{index + 1}<Text style={styles.counterOf}>/{stretches.length}</Text></Text>
+            <Text style={styles.counter}>
+              {index + 1}<Text style={styles.counterOf}>/{stretches.length}</Text>
+            </Text>
             <View style={styles.voiceToggle}>
-              <Text style={styles.voiceEmoji}>{voiceEnabled ? '🔊' : '🔇'}</Text>
+              <Ionicons
+                name={voiceEnabled ? 'volume-high' : 'volume-mute'}
+                size={18}
+                color={voiceEnabled ? colors.accent : colors.textLight}
+              />
               <Switch
                 value={voiceEnabled}
                 onValueChange={toggleVoice}
@@ -250,11 +257,11 @@ export default function SessionScreen() {
                   setShowInfo(true);
                 }}
               >
-                <Text style={styles.infoIcon}>ⓘ</Text>
+                <Ionicons name="information-circle-outline" size={18} color={colors.accent} />
               </TouchableOpacity>
             </View>
 
-            {/* Timer — owns the card */}
+            {/* Timer */}
             <View style={styles.timerSection}>
               <PulsingTimer
                 stretchId={current.id}
@@ -270,22 +277,22 @@ export default function SessionScreen() {
                 {breathingCue}
               </Text>
               {timeLeft === 0 && (
-                <Text style={styles.doneText}>✓ Done!</Text>
+                <View style={styles.doneRow}>
+                  <Ionicons name="checkmark-circle" size={18} color={colors.success} />
+                  <Text style={styles.doneText}>Done!</Text>
+                </View>
               )}
             </View>
 
           </Animated.View>
 
-          {/* Pause — slim, outside the card */}
+          {/* Pause */}
           <TouchableOpacity
             style={styles.pauseButton}
-            onPress={() => {
-              Speech.stop();
-              setIsRunning(false);
-              setIsPaused(true);
-            }}
+            onPress={() => { Speech.stop(); setIsRunning(false); setIsPaused(true); }}
           >
-            <Text style={styles.pauseText}>⏸  Pause</Text>
+            <Ionicons name="pause" size={16} color={colors.textMid} />
+            <Text style={styles.pauseText}>Pause</Text>
           </TouchableOpacity>
 
           {/* Feedback row */}
@@ -294,21 +301,32 @@ export default function SessionScreen() {
               style={[styles.feedbackButton, isFavourited && styles.feedbackButtonActive]}
               onPress={handleFavourite}
             >
-              <Text style={styles.feedbackEmoji}>{isFavourited ? '❤️' : '🤍'}</Text>
+              <Ionicons
+                name={isFavourited ? 'heart' : 'heart-outline'}
+                size={18}
+                color={isFavourited ? colors.accent : colors.textMid}
+              />
               <Text style={[styles.feedbackText, isFavourited && styles.feedbackTextActive]}>
                 {isFavourited ? 'Saved' : 'Favourite'}
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.feedbackButton} onPress={handleNotInterested}>
-              <Text style={styles.feedbackEmoji}>👎</Text>
+              <Ionicons name="thumbs-down-outline" size={18} color={colors.textMid} />
               <Text style={styles.feedbackText}>Not for me</Text>
             </TouchableOpacity>
           </View>
 
           {/* Next button */}
           <TouchableOpacity style={styles.nextButton} onPress={() => goNext(false)}>
-            <Text style={styles.nextText}>{isLast ? '🎉  Finish Session' : 'Next  →'}</Text>
+            <Text style={styles.nextText}>
+              {isLast ? 'Finish Session' : 'Next'}
+            </Text>
+            <Ionicons
+              name={isLast ? 'checkmark-done' : 'arrow-forward'}
+              size={18}
+              color={colors.white}
+            />
           </TouchableOpacity>
 
           <StretchInfoSheet
@@ -342,7 +360,6 @@ const styles = StyleSheet.create({
   counter:              { fontSize: 13, fontWeight: '700', color: colors.textDark },
   counterOf:            { fontSize: 13, fontWeight: '400', color: colors.textMid },
   voiceToggle:          { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  voiceEmoji:           { fontSize: 15 },
 
   card:                 { backgroundColor: colors.white, borderRadius: 28, padding: 28, marginBottom: 12, ...shadows.accent },
 
@@ -351,23 +368,22 @@ const styles = StyleSheet.create({
   muscle:               { fontSize: 11, fontWeight: '700', color: colors.accent, letterSpacing: 1.8, marginBottom: 6 },
   name:                 { fontSize: 28, fontWeight: '800', color: colors.textDark, lineHeight: 32 },
   infoButton:           { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.background, borderWidth: 1.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center', marginTop: 2 },
-  infoIcon:             { fontSize: 14, color: colors.accent, fontWeight: '700' },
 
   timerSection:         { alignItems: 'center', paddingVertical: 16 },
   breathingCue:         { fontSize: 15, fontWeight: '600', letterSpacing: 0.5, marginTop: 16, height: 22 },
-  doneText:             { color: colors.success, fontSize: 15, fontWeight: '700', marginTop: 12 },
+  doneRow:              { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 12 },
+  doneText:             { color: colors.success, fontSize: 15, fontWeight: '700' },
 
-  pauseButton:          { paddingVertical: 10, borderRadius: 20, borderWidth: 1.5, borderColor: colors.border, alignItems: 'center', marginBottom: 12 },
+  pauseButton:          { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderRadius: 20, borderWidth: 1.5, borderColor: colors.border, marginBottom: 12 },
   pauseText:            { color: colors.textMid, fontSize: 14, fontWeight: '600' },
 
   feedbackRow:          { flexDirection: 'row', gap: 10, marginBottom: 12 },
   feedbackButton:       { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderRadius: 16, backgroundColor: colors.white, borderWidth: 1.5, borderColor: colors.border },
   feedbackButtonActive: { borderColor: colors.accent, backgroundColor: colors.accentLight },
-  feedbackEmoji:        { fontSize: 16 },
   feedbackText:         { color: colors.textMid, fontSize: 13, fontWeight: '600' },
   feedbackTextActive:   { color: colors.accent },
 
-  nextButton:           { backgroundColor: colors.accent, borderRadius: 18, paddingVertical: 18, alignItems: 'center', shadowColor: colors.accent, shadowOpacity: 0.3, shadowRadius: 12, shadowOffset: { width: 0, height: 5 }, elevation: 5 },
+  nextButton:           { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: colors.accent, borderRadius: 18, paddingVertical: 18, shadowColor: colors.accent, shadowOpacity: 0.3, shadowRadius: 12, shadowOffset: { width: 0, height: 5 }, elevation: 5 },
   nextText:             { color: colors.white, fontSize: 17, fontWeight: '800', letterSpacing: 0.3 },
 
   emptyContainer:       { flex: 1, backgroundColor: colors.background, paddingHorizontal: 20, justifyContent: 'center' },

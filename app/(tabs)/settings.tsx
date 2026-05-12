@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
@@ -20,9 +21,9 @@ const formatTime = (time: string): string => {
 };
 
 export default function SettingsScreen() {
-  const [enabled, setEnabled]           = useState(false);
+  const [enabled, setEnabled]             = useState(false);
   const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
-  const [saved, setSaved]               = useState(false);
+  const [saved, setSaved]                 = useState(false);
 
   useFocusEffect(useCallback(() => {
     const load = async () => {
@@ -66,48 +67,83 @@ export default function SettingsScreen() {
             <Text style={shared.screenTitle}>Settings</Text>
             <Text style={[shared.subtitle, styles.subtitleLeft]}>Customise your experience</Text>
 
+            {/* Reminders toggle */}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <View>
-                  <Text style={styles.sectionTitle}>🔔  Daily Reminders</Text>
-                  <Text style={styles.sectionDesc}>Get nudged to stretch every day</Text>
+                <View style={styles.sectionLeft}>
+                  <Ionicons name="notifications-outline" size={20} color={colors.accent} />
+                  <View>
+                    <Text style={styles.sectionTitle}>Daily Reminders</Text>
+                    <Text style={styles.sectionDesc}>Get nudged to stretch every day</Text>
+                  </View>
                 </View>
-                <Switch value={enabled} onValueChange={toggleEnabled} trackColor={{ false: colors.border, true: colors.accent }} thumbColor={colors.white} />
+                <Switch
+                  value={enabled}
+                  onValueChange={toggleEnabled}
+                  trackColor={{ false: colors.border, true: colors.accent }}
+                  thumbColor={colors.white}
+                />
               </View>
             </View>
 
+            {/* Reminder times */}
             {enabled && (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>⏰  Reminder Times</Text>
-                <Text style={styles.sectionDesc}>Pick up to 3 times per day</Text>
+                <View style={styles.sectionLeft}>
+                  <Ionicons name="time-outline" size={20} color={colors.accent} />
+                  <View>
+                    <Text style={styles.sectionTitle}>Reminder Times</Text>
+                    <Text style={styles.sectionDesc}>Pick up to 3 times per day</Text>
+                  </View>
+                </View>
                 <View style={{ marginTop: 16 }}>
                   {PRESET_TIMES.map(({ label, time }) => {
                     const isSelected = selectedTimes.includes(time);
                     return (
-                      <TouchableOpacity key={time} style={[styles.timeCard, isSelected && styles.timeCardSelected]} onPress={() => toggleTime(time)}>
+                      <TouchableOpacity
+                        key={time}
+                        style={[styles.timeCard, isSelected && styles.timeCardSelected]}
+                        onPress={() => toggleTime(time)}
+                      >
                         <Text style={styles.timeLabel}>{label}</Text>
                         <View style={styles.timeRight}>
                           <Text style={styles.timeValue}>{formatTime(time)}</Text>
-                          {isSelected && <Text style={styles.tick}> ✓</Text>}
+                          {isSelected && (
+                            <Ionicons name="checkmark-circle" size={18} color={colors.accent} style={{ marginLeft: 6 }} />
+                          )}
                         </View>
                       </TouchableOpacity>
                     );
                   })}
                 </View>
-                <TouchableOpacity style={[shared.primaryButton, saved && styles.saveButtonSaved, { marginTop: 8 }]} onPress={handleSave}>
-                  <Text style={shared.primaryButtonText}>{saved ? '✓  Reminders Saved!' : 'Save Reminders'}</Text>
+                <TouchableOpacity
+                  style={[shared.primaryButton, saved && styles.saveButtonSaved, { marginTop: 8 }]}
+                  onPress={handleSave}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    {saved && <Ionicons name="checkmark" size={18} color={colors.white} />}
+                    <Text style={shared.primaryButtonText}>
+                      {saved ? 'Reminders Saved!' : 'Save Reminders'}
+                    </Text>
+                  </View>
                 </TouchableOpacity>
               </View>
             )}
 
+            {/* About */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>📱  About</Text>
-              <Text style={styles.aboutText}>Stretch App</Text>
+              <View style={styles.sectionLeft}>
+                <Ionicons name="phone-portrait-outline" size={20} color={colors.accent} />
+                <Text style={styles.sectionTitle}>About</Text>
+              </View>
+              <Text style={styles.aboutText}>Stretchly</Text>
               <Text style={styles.aboutVersion}>Version 1.0</Text>
-              <Text style={styles.aboutDesc}>Built with React Native + Expo.{'\n'}Helping you move more, one stretch at a time.</Text>
+              <Text style={styles.aboutDesc}>
+                Built with React Native + Expo.{'\n'}Helping you move more, one stretch at a time.
+              </Text>
             </View>
 
-            <View style={{ height: 40 }} />
+            <View style={{ height: 120 }} />
           </ScrollView>
         </SafeAreaView>
       </LinearGradient>
@@ -120,14 +156,14 @@ const styles = StyleSheet.create({
   subtitleLeft:     { textAlign: 'left', marginBottom: 24 },
   section:          { backgroundColor: colors.white, borderRadius: 20, padding: 20, marginBottom: 16, ...shadows.card },
   sectionHeader:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  sectionTitle:     { color: colors.textDark, fontSize: 16, fontWeight: '600', marginBottom: 4 },
+  sectionLeft:      { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 4 },
+  sectionTitle:     { color: colors.textDark, fontSize: 16, fontWeight: '600', marginBottom: 2 },
   sectionDesc:      { color: colors.textMid, fontSize: 13 },
-  timeCard:         { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderRadius: 12, borderWidth: 1, borderColor: colors.border, marginBottom: 8, backgroundColor: colors.background },
+  timeCard:         { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 14, borderRadius: 12, borderWidth: 1, borderColor: colors.border, marginBottom: 8, backgroundColor: colors.background },
   timeCardSelected: { borderColor: colors.accent, backgroundColor: colors.accentLight },
   timeLabel:        { color: colors.textDark, fontSize: 15 },
   timeRight:        { flexDirection: 'row', alignItems: 'center' },
   timeValue:        { color: colors.textMid, fontSize: 14 },
-  tick:             { color: colors.accent, fontSize: 14, fontWeight: '700' },
   saveButtonSaved:  { backgroundColor: colors.success },
   aboutText:        { color: colors.textDark, fontSize: 16, fontWeight: '600', marginTop: 12, marginBottom: 2 },
   aboutVersion:     { color: colors.textMid, fontSize: 13, marginBottom: 8 },
