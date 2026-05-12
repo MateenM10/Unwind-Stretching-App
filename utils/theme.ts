@@ -45,6 +45,14 @@ export const shadows = {
   },
 };
 
+// Add to your existing theme.ts exports
+export const motivationColors = {
+  flame:    '#FF8C42',
+  streak:   '#E8924A',
+  energy:   '#F5B947',
+  cool:     '#7DAEA0',
+};
+
 // ————————————————————————————
 // SHARED STYLES — reused across screens
 // ————————————————————————————
