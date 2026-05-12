@@ -1,13 +1,14 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { StreakData, getStreakData, getWeeklyData } from '../../utils/streaks';
-import { colors, shadows, shared } from '../../utils/theme';
+import { colors, gradient, shadows, shared } from '../../utils/theme';
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 export default function ProgressScreen() {
-  const [data, setData] = useState<StreakData | null>(null);
+  const [data, setData]     = useState<StreakData | null>(null);
   const [weekly, setWeekly] = useState<number[]>(Array(7).fill(0));
 
   useFocusEffect(
@@ -22,7 +23,7 @@ export default function ProgressScreen() {
   );
 
   const formatTime = (seconds: number) => {
-    const hrs = Math.floor(seconds / 3600);
+    const hrs  = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     if (hrs > 0) return `${hrs}h ${mins}m`;
     return `${mins}m`;
@@ -40,85 +41,81 @@ export default function ProgressScreen() {
 
   return (
     <>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
-      <SafeAreaView style={shared.screen}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <Text style={shared.screenTitle}>Your Progress</Text>
-          <Text style={[shared.subtitle, styles.subtitleLeft]}>Keep showing up</Text>
+      <StatusBar barStyle="dark-content" />
+      <LinearGradient colors={gradient.screen} style={{ flex: 1 }}>
+        <SafeAreaView style={styles.container}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <Text style={shared.screenTitle}>Your Progress</Text>
+            <Text style={[shared.subtitle, styles.subtitleLeft]}>Keep showing up</Text>
 
-          {/* Streak hero */}
-          <View style={styles.streakCard}>
-            <Text style={styles.streakEmoji}>{getStreakEmoji(data?.currentStreak ?? 0)}</Text>
-            <Text style={styles.streakNumber}>{data?.currentStreak ?? 0}</Text>
-            <Text style={styles.streakLabel}>Day Streak</Text>
-          </View>
+            <View style={styles.streakCard}>
+              <Text style={styles.streakEmoji}>{getStreakEmoji(data?.currentStreak ?? 0)}</Text>
+              <Text style={styles.streakNumber}>{data?.currentStreak ?? 0}</Text>
+              <Text style={styles.streakLabel}>Day Streak</Text>
+            </View>
 
-          {/* Stats grid */}
-          <View style={styles.statsGrid}>
-            {[
-              { value: data?.totalSessions ?? 0,                    label: 'Sessions'    },
-              { value: formatTime(data?.totalTimeSeconds ?? 0),     label: 'Total Time'  },
-              { value: data?.longestStreak ?? 0,                    label: 'Best Streak' },
-            ].map((stat, i) => (
-              <View key={i} style={styles.statCard}>
-                <Text style={styles.statNumber}>{stat.value}</Text>
-                <Text style={styles.statLabel}>{stat.label}</Text>
-              </View>
-            ))}
-          </View>
-
-          {/* Weekly chart */}
-          <View style={styles.sectionCard}>
-            <Text style={styles.sectionTitle}>This Week</Text>
-            <View style={styles.chartRow}>
-              {weekly.map((count, i) => (
-                <View key={i} style={styles.barColumn}>
-                  <View style={styles.barTrack}>
-                    <View style={[
-                      styles.barFill,
-                      {
-                        height: `${(count / maxBar) * 100}%`,
-                        backgroundColor: count > 0 ? colors.accent : colors.border,
-                      }
-                    ]} />
-                  </View>
-                  <Text style={styles.barLabel}>{DAY_LABELS[i]}</Text>
-                  {count > 0 && <Text style={styles.barCount}>{count}</Text>}
+            <View style={styles.statsGrid}>
+              {[
+                { value: data?.totalSessions ?? 0,                label: 'Sessions'    },
+                { value: formatTime(data?.totalTimeSeconds ?? 0), label: 'Total Time'  },
+                { value: data?.longestStreak ?? 0,                label: 'Best Streak' },
+              ].map((stat, i) => (
+                <View key={i} style={styles.statCard}>
+                  <Text style={styles.statNumber}>{stat.value}</Text>
+                  <Text style={styles.statLabel}>{stat.label}</Text>
                 </View>
               ))}
             </View>
-          </View>
 
-          {/* Milestones */}
-          <View style={styles.sectionCard}>
-            <Text style={styles.sectionTitle}>Milestones</Text>
-            {[
-              { days: 3,  label: '3 Day Streak',  emoji: '✨' },
-              { days: 7,  label: '1 Week Streak',  emoji: '⚡' },
-              { days: 14, label: '2 Week Streak',  emoji: '🔥' },
-              { days: 30, label: '30 Day Streak',  emoji: '🏆' },
-            ].map(m => {
-              const reached = (data?.longestStreak ?? 0) >= m.days;
-              return (
-                <View key={m.days} style={[styles.milestone, reached && styles.milestoneReached]}>
-                  <Text style={styles.milestoneEmoji}>{m.emoji}</Text>
-                  <Text style={[styles.milestoneLabel, reached && styles.milestoneLabelReached]}>
-                    {m.label}
-                  </Text>
-                  {reached && <Text style={styles.milestoneTick}>✓</Text>}
-                </View>
-              );
-            })}
-          </View>
+            <View style={styles.sectionCard}>
+              <Text style={styles.sectionTitle}>This Week</Text>
+              <View style={styles.chartRow}>
+                {weekly.map((count, i) => (
+                  <View key={i} style={styles.barColumn}>
+                    <View style={styles.barTrack}>
+                      <View style={[
+                        styles.barFill,
+                        { height: `${(count / maxBar) * 100}%`, backgroundColor: count > 0 ? colors.accent : colors.border }
+                      ]} />
+                    </View>
+                    <Text style={styles.barLabel}>{DAY_LABELS[i]}</Text>
+                    {count > 0 && <Text style={styles.barCount}>{count}</Text>}
+                  </View>
+                ))}
+              </View>
+            </View>
 
-          <View style={{ height: 40 }} />
-        </ScrollView>
-      </SafeAreaView>
+            <View style={styles.sectionCard}>
+              <Text style={styles.sectionTitle}>Milestones</Text>
+              {[
+                { days: 3,  label: '3 Day Streak',  emoji: '✨' },
+                { days: 7,  label: '1 Week Streak',  emoji: '⚡' },
+                { days: 14, label: '2 Week Streak',  emoji: '🔥' },
+                { days: 30, label: '30 Day Streak',  emoji: '🏆' },
+              ].map(m => {
+                const reached = (data?.longestStreak ?? 0) >= m.days;
+                return (
+                  <View key={m.days} style={[styles.milestone, reached && styles.milestoneReached]}>
+                    <Text style={styles.milestoneEmoji}>{m.emoji}</Text>
+                    <Text style={[styles.milestoneLabel, reached && styles.milestoneLabelReached]}>
+                      {m.label}
+                    </Text>
+                    {reached && <Text style={styles.milestoneTick}>✓</Text>}
+                  </View>
+                );
+              })}
+            </View>
+
+            <View style={{ height: 40 }} />
+          </ScrollView>
+        </SafeAreaView>
+      </LinearGradient>
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  container:             { flex: 1, padding: 24 },
   subtitleLeft:          { textAlign: 'left', marginBottom: 24 },
   streakCard:            { backgroundColor: colors.white, borderRadius: 24, padding: 32, alignItems: 'center', marginBottom: 16, borderWidth: 2, borderColor: colors.accent, ...shadows.accent },
   streakEmoji:           { fontSize: 48, marginBottom: 8 },

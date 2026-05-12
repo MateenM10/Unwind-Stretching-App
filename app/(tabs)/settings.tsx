@@ -1,8 +1,9 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Alert, SafeAreaView, ScrollView, StatusBar, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { cancelAllReminders, getSavedReminders, requestPermissions, scheduleReminders } from '../../utils/reminders';
-import { colors, shadows, shared } from '../../utils/theme';
+import { colors, gradient, shadows, shared } from '../../utils/theme';
 
 const PRESET_TIMES = [
   { label: '🌅  Morning',    time: '08:00' },
@@ -19,9 +20,9 @@ const formatTime = (time: string): string => {
 };
 
 export default function SettingsScreen() {
-  const [enabled, setEnabled] = useState(false);
+  const [enabled, setEnabled]           = useState(false);
   const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved]               = useState(false);
 
   useFocusEffect(useCallback(() => {
     const load = async () => {
@@ -58,61 +59,64 @@ export default function SettingsScreen() {
 
   return (
     <>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
-      <SafeAreaView style={shared.screen}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <Text style={shared.screenTitle}>Settings</Text>
-          <Text style={[shared.subtitle, styles.subtitleLeft]}>Customise your experience</Text>
+      <StatusBar barStyle="dark-content" />
+      <LinearGradient colors={gradient.screen} style={{ flex: 1 }}>
+        <SafeAreaView style={styles.container}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <Text style={shared.screenTitle}>Settings</Text>
+            <Text style={[shared.subtitle, styles.subtitleLeft]}>Customise your experience</Text>
 
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <View>
-                <Text style={styles.sectionTitle}>🔔  Daily Reminders</Text>
-                <Text style={styles.sectionDesc}>Get nudged to stretch every day</Text>
-              </View>
-              <Switch value={enabled} onValueChange={toggleEnabled} trackColor={{ false: colors.border, true: colors.accent }} thumbColor={colors.white} />
-            </View>
-          </View>
-
-          {enabled && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>⏰  Reminder Times</Text>
-              <Text style={styles.sectionDesc}>Pick up to 3 times per day</Text>
-              <View style={{ marginTop: 16 }}>
-                {PRESET_TIMES.map(({ label, time }) => {
-                  const isSelected = selectedTimes.includes(time);
-                  return (
-                    <TouchableOpacity key={time} style={[styles.timeCard, isSelected && styles.timeCardSelected]} onPress={() => toggleTime(time)}>
-                      <Text style={styles.timeLabel}>{label}</Text>
-                      <View style={styles.timeRight}>
-                        <Text style={styles.timeValue}>{formatTime(time)}</Text>
-                        {isSelected && <Text style={styles.tick}> ✓</Text>}
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
+              <View style={styles.sectionHeader}>
+                <View>
+                  <Text style={styles.sectionTitle}>🔔  Daily Reminders</Text>
+                  <Text style={styles.sectionDesc}>Get nudged to stretch every day</Text>
+                </View>
+                <Switch value={enabled} onValueChange={toggleEnabled} trackColor={{ false: colors.border, true: colors.accent }} thumbColor={colors.white} />
               </View>
-              <TouchableOpacity style={[shared.primaryButton, saved && styles.saveButtonSaved, { marginTop: 8 }]} onPress={handleSave}>
-                <Text style={shared.primaryButtonText}>{saved ? '✓  Reminders Saved!' : 'Save Reminders'}</Text>
-              </TouchableOpacity>
             </View>
-          )}
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>📱  About</Text>
-            <Text style={styles.aboutText}>Stretch App</Text>
-            <Text style={styles.aboutVersion}>Version 1.0</Text>
-            <Text style={styles.aboutDesc}>Built with React Native + Expo.{'\n'}Helping you move more, one stretch at a time.</Text>
-          </View>
+            {enabled && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>⏰  Reminder Times</Text>
+                <Text style={styles.sectionDesc}>Pick up to 3 times per day</Text>
+                <View style={{ marginTop: 16 }}>
+                  {PRESET_TIMES.map(({ label, time }) => {
+                    const isSelected = selectedTimes.includes(time);
+                    return (
+                      <TouchableOpacity key={time} style={[styles.timeCard, isSelected && styles.timeCardSelected]} onPress={() => toggleTime(time)}>
+                        <Text style={styles.timeLabel}>{label}</Text>
+                        <View style={styles.timeRight}>
+                          <Text style={styles.timeValue}>{formatTime(time)}</Text>
+                          {isSelected && <Text style={styles.tick}> ✓</Text>}
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+                <TouchableOpacity style={[shared.primaryButton, saved && styles.saveButtonSaved, { marginTop: 8 }]} onPress={handleSave}>
+                  <Text style={shared.primaryButtonText}>{saved ? '✓  Reminders Saved!' : 'Save Reminders'}</Text>
+                </TouchableOpacity>
+              </View>
+            )}
 
-          <View style={{ height: 40 }} />
-        </ScrollView>
-      </SafeAreaView>
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>📱  About</Text>
+              <Text style={styles.aboutText}>Stretch App</Text>
+              <Text style={styles.aboutVersion}>Version 1.0</Text>
+              <Text style={styles.aboutDesc}>Built with React Native + Expo.{'\n'}Helping you move more, one stretch at a time.</Text>
+            </View>
+
+            <View style={{ height: 40 }} />
+          </ScrollView>
+        </SafeAreaView>
+      </LinearGradient>
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  container:        { flex: 1, padding: 24 },
   subtitleLeft:     { textAlign: 'left', marginBottom: 24 },
   section:          { backgroundColor: colors.white, borderRadius: 20, padding: 20, marginBottom: 16, ...shadows.card },
   sectionHeader:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

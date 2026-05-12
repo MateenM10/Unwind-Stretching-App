@@ -1,8 +1,9 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ALL_STRETCHES } from '../../utils/stretches';
-import { colors, shadows, shared } from '../../utils/theme';
+import { colors, gradient, shadows, shared } from '../../utils/theme';
 import { getFavourites, getWeights, toggleFavourite } from '../../utils/weights';
 
 const MUSCLE_ORDER = ['neck', 'shoulders', 'chest', 'back', 'hips', 'glutes', 'quads', 'hamstrings', 'calves', 'ankles', 'general'];
@@ -23,15 +24,15 @@ const MUSCLE_LABELS: Record<string, string> = {
 
 export default function LibraryScreen() {
   const [favourites, setFavourites] = useState<string[]>([]);
-  const [weights, setWeights] = useState<Record<string, number>>({});
-  const [filter, setFilter] = useState<'all' | 'favourites'>('all');
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [weights, setWeights]       = useState<Record<string, number>>({});
+  const [filter, setFilter]         = useState<'all' | 'favourites'>('all');
+  const [collapsed, setCollapsed]   = useState<Record<string, boolean>>({});
 
   useFocusEffect(
     useCallback(() => {
       const load = async () => {
         const favs = await getFavourites();
-        const w = await getWeights();
+        const w    = await getWeights();
         setFavourites(favs);
         setWeights(w);
       };
@@ -39,7 +40,7 @@ export default function LibraryScreen() {
     }, [])
   );
 
-  const handleFavourite = async (id: string) => {
+  const handleFavourite  = async (id: string) => {
     const updated = await toggleFavourite(id);
     setFavourites(updated);
   };
@@ -59,7 +60,6 @@ export default function LibraryScreen() {
     ? ALL_STRETCHES.filter(s => favourites.includes(s.id))
     : ALL_STRETCHES;
 
-  // Group by muscle
   const grouped = MUSCLE_ORDER.reduce((acc, muscle) => {
     const group = displayed.filter(s => s.muscle === muscle);
     if (group.length > 0) acc[muscle] = group;
@@ -68,77 +68,76 @@ export default function LibraryScreen() {
 
   return (
     <>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
-      <SafeAreaView style={shared.screen}>
-        <Text style={shared.screenTitle}>Stretch Library</Text>
-        <Text style={[shared.subtitle, styles.subtitleLeft]}>Browse and manage your stretches</Text>
+      <StatusBar barStyle="dark-content" />
+      <LinearGradient colors={gradient.screen} style={{ flex: 1 }}>
+        <SafeAreaView style={styles.container}>
+          <Text style={shared.screenTitle}>Stretch Library</Text>
+          <Text style={[shared.subtitle, styles.subtitleLeft]}>Browse and manage your stretches</Text>
 
-        {/* Filter tabs */}
-        <View style={styles.filterRow}>
-          {(['all', 'favourites'] as const).map(f => (
-            <TouchableOpacity
-              key={f}
-              style={[styles.filterTab, filter === f && styles.filterTabActive]}
-              onPress={() => setFilter(f)}
-            >
-              <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>
-                {f === 'all' ? 'All' : '❤️  Favourites'}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+          <View style={styles.filterRow}>
+            {(['all', 'favourites'] as const).map(f => (
+              <TouchableOpacity
+                key={f}
+                style={[styles.filterTab, filter === f && styles.filterTabActive]}
+                onPress={() => setFilter(f)}
+              >
+                <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>
+                  {f === 'all' ? 'All' : '❤️  Favourites'}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
 
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {Object.keys(grouped).length === 0 && (
-            <Text style={shared.emptyText}>No favourites yet — heart a stretch during a session!</Text>
-          )}
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {Object.keys(grouped).length === 0 && (
+              <Text style={shared.emptyText}>No favourites yet — heart a stretch during a session!</Text>
+            )}
 
-          {Object.entries(grouped).map(([muscle, stretches]) => {
-            const isCollapsed = collapsed[muscle];
-            return (
-              <View key={muscle} style={styles.section}>
-
-                {/* Section header */}
-                <TouchableOpacity style={styles.sectionHeader} onPress={() => toggleCollapse(muscle)}>
-                  <Text style={styles.sectionTitle}>{MUSCLE_LABELS[muscle]}</Text>
-                  <View style={styles.sectionRight}>
-                    <Text style={styles.sectionCount}>{stretches.length}</Text>
-                    <Text style={styles.sectionChevron}>{isCollapsed ? '›' : '⌄'}</Text>
-                  </View>
-                </TouchableOpacity>
-
-                {/* Stretch cards */}
-                {!isCollapsed && stretches.map(stretch => {
-                  const isFav = favourites.includes(stretch.id);
-                  const weightInfo = getWeightLabel(stretch.id);
-                  return (
-                    <View key={stretch.id} style={styles.card}>
-                      <View style={styles.cardLeft}>
-                        <Text style={styles.cardName}>{stretch.name}</Text>
-                        <View style={styles.cardMeta}>
-                          <Text style={styles.cardDuration}>{stretch.duration}s</Text>
-                          <Text style={styles.cardDot}>·</Text>
-                          <Text style={[styles.cardWeight, { color: weightInfo.color }]}>{weightInfo.label}</Text>
-                        </View>
-                      </View>
-                      <TouchableOpacity onPress={() => handleFavourite(stretch.id)}>
-                        <Text style={styles.heartIcon}>{isFav ? '❤️' : '🤍'}</Text>
-                      </TouchableOpacity>
+            {Object.entries(grouped).map(([muscle, stretches]) => {
+              const isCollapsed = collapsed[muscle];
+              return (
+                <View key={muscle} style={styles.section}>
+                  <TouchableOpacity style={styles.sectionHeader} onPress={() => toggleCollapse(muscle)}>
+                    <Text style={styles.sectionTitle}>{MUSCLE_LABELS[muscle]}</Text>
+                    <View style={styles.sectionRight}>
+                      <Text style={styles.sectionCount}>{stretches.length}</Text>
+                      <Text style={styles.sectionChevron}>{isCollapsed ? '›' : '⌄'}</Text>
                     </View>
-                  );
-                })}
-              </View>
-            );
-          })}
+                  </TouchableOpacity>
 
-          <View style={{ height: 40 }} />
-        </ScrollView>
-      </SafeAreaView>
+                  {!isCollapsed && stretches.map(stretch => {
+                    const isFav       = favourites.includes(stretch.id);
+                    const weightInfo  = getWeightLabel(stretch.id);
+                    return (
+                      <View key={stretch.id} style={styles.card}>
+                        <View style={styles.cardLeft}>
+                          <Text style={styles.cardName}>{stretch.name}</Text>
+                          <View style={styles.cardMeta}>
+                            <Text style={styles.cardDuration}>{stretch.duration}s</Text>
+                            <Text style={styles.cardDot}>·</Text>
+                            <Text style={[styles.cardWeight, { color: weightInfo.color }]}>{weightInfo.label}</Text>
+                          </View>
+                        </View>
+                        <TouchableOpacity onPress={() => handleFavourite(stretch.id)}>
+                          <Text style={styles.heartIcon}>{isFav ? '❤️' : '🤍'}</Text>
+                        </TouchableOpacity>
+                      </View>
+                    );
+                  })}
+                </View>
+              );
+            })}
+
+            <View style={{ height: 40 }} />
+          </ScrollView>
+        </SafeAreaView>
+      </LinearGradient>
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  container:        { flex: 1, padding: 24 },
   subtitleLeft:     { textAlign: 'left', marginBottom: 20 },
   filterRow:        { flexDirection: 'row', gap: 10, marginBottom: 20 },
   filterTab:        { paddingVertical: 8, paddingHorizontal: 18, borderRadius: 20, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.white },

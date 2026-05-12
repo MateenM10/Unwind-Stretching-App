@@ -53,6 +53,10 @@ export const motivationColors = {
   cool:     '#7DAEA0',
 };
 
+export const gradient = {
+  screen: ['#FAF7F2', '#F5EDE0'] as const,
+};
+
 // ————————————————————————————
 // SHARED STYLES — reused across screens
 // ————————————————————————————

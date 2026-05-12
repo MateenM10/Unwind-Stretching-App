@@ -1,9 +1,10 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import { Animated, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import GradientButton from '../components/GradientButton';
 import HapticButton from '../components/HapticButton';
-import { colors, shadows, shared } from '../utils/theme';
+import { colors, gradient, shadows, shared } from '../utils/theme';
 
 const BODY_PARTS = [
   { id: 'neck',       emoji: '🙆',  name: 'Neck'       },
@@ -50,7 +51,6 @@ function BodyPartCard({ part, isSelected, onPress }: {
         <Text style={[styles.gridName, { color: isSelected ? colors.accent : colors.textDark }]}>
           {part.name}
         </Text>
-        {/* Always rendered — invisible when unselected */}
         <View style={[styles.checkCircle, { opacity: isSelected ? 1 : 0 }]}>
           <Text style={styles.checkMark}>✓</Text>
         </View>
@@ -67,7 +67,7 @@ export default function BodyPartPicker() {
   const toggle = (id: string) => setSelected(prev =>
     prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
   );
-  const selectAll  = () => setSelected(BODY_PARTS.map(p => p.id));
+  const selectAll   = () => setSelected(BODY_PARTS.map(p => p.id));
   const allSelected = selected.length === BODY_PARTS.length;
   const isSelected  = (id: string) => selected.includes(id);
 
@@ -79,61 +79,64 @@ export default function BodyPartPicker() {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
-      <SafeAreaView style={shared.screen}>
+      <StatusBar barStyle="dark-content" />
+      <LinearGradient colors={gradient.screen} style={{ flex: 1 }}>
+        <SafeAreaView style={styles.container}>
 
-        <View style={styles.heroSection}>
-          <Text style={shared.heroTitle}>Any Focus Today?</Text>
-          <Text style={shared.subtitle}>Pick one or more areas, or select all</Text>
-        </View>
+          <View style={styles.heroSection}>
+            <Text style={shared.heroTitle}>Any Focus Today?</Text>
+            <Text style={shared.subtitle}>Pick one or more areas, or select all</Text>
+          </View>
 
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={styles.grid}>
-            {BODY_PARTS.map(part => (
-              <BodyPartCard
-                key={part.id}
-                part={part}
-                isSelected={isSelected(part.id)}
-                onPress={() => toggle(part.id)}
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <View style={styles.grid}>
+              {BODY_PARTS.map(part => (
+                <BodyPartCard
+                  key={part.id}
+                  part={part}
+                  isSelected={isSelected(part.id)}
+                  onPress={() => toggle(part.id)}
+                />
+              ))}
+            </View>
+
+            <HapticButton
+              haptic="light"
+              style={[
+                styles.allButton,
+                {
+                  borderColor: allSelected ? colors.accent : colors.border,
+                  backgroundColor: allSelected ? colors.accentLight : 'transparent',
+                }
+              ]}
+              onPress={allSelected ? () => setSelected([]) : selectAll}
+            >
+              <Text style={styles.allButtonText}>
+                {allSelected ? '✦  Deselect All' : '✦  Select All Areas'}
+              </Text>
+            </HapticButton>
+
+            <View style={{ height: 100 }} />
+          </ScrollView>
+
+          {selected.length > 0 && (
+            <View style={shared.floatingWrapper}>
+              <GradientButton
+                label={`Start Stretching${selected.length > 1 ? ` (${selected.length} areas)` : ''} →`}
+                haptic="medium"
+                onPress={handleStart}
               />
-            ))}
-          </View>
+            </View>
+          )}
 
-          <HapticButton
-            haptic="light"
-            style={[
-              styles.allButton,
-              {
-                borderColor: allSelected ? colors.accent : colors.border,
-                backgroundColor: allSelected ? colors.accentLight : 'transparent',
-              }
-            ]}
-            onPress={allSelected ? () => setSelected([]) : selectAll}
-          >
-            <Text style={styles.allButtonText}>
-              {allSelected ? '✦  Deselect All' : '✦  Select All Areas'}
-            </Text>
-          </HapticButton>
-
-          <View style={{ height: 100 }} />
-        </ScrollView>
-
-        {selected.length > 0 && (
-          <View style={shared.floatingWrapper}>
-            <GradientButton
-              label={`Start Stretching${selected.length > 1 ? ` (${selected.length} areas)` : ''} →`}
-              haptic="medium"
-              onPress={handleStart}
-            />
-          </View>
-        )}
-
-      </SafeAreaView>
+        </SafeAreaView>
+      </LinearGradient>
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  container:    { flex: 1, padding: 24 },
   heroSection:  { alignItems: 'center', marginBottom: 28 },
   grid:         { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 14 },
   cardWrapper:  { width: '47.5%' },
