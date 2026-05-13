@@ -5,15 +5,16 @@ import { useCallback, useRef, useState } from 'react';
 import { Animated, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import AnimatedFlame from '../../components/AnimatedFlame';
 import AnimatedNumber from '../../components/AnimatedNumber';
+import FloatingOrbs from '../../components/FloatingOrbs';
 import GradientButton from '../../components/GradientButton';
 import HapticButton from '../../components/HapticButton';
 import { getStreakData } from '../../utils/streaks';
 import { colors, shadows } from '../../utils/theme';
 
 const positions = [
-  { id: 'couch',    label: '🛋️',  name: 'On the Couch',  desc: 'Seated' },
-  { id: 'standing', label: '🧍',  name: 'Standing',      desc: 'Upright' },
-  { id: 'lying',    label: '🛏️',  name: 'Lying Down',    desc: 'Floor' },
+  { id: 'couch',    label: '🛋️', name: 'On the Couch', desc: 'Seated'  },
+  { id: 'standing', label: '🧍', name: 'Standing',      desc: 'Upright' },
+  { id: 'lying',    label: '🛏️', name: 'Lying Down',    desc: 'Floor'   },
 ];
 
 const MOTIVATIONS = [
@@ -55,7 +56,7 @@ function PositionCard({ pos, isSelected, onPress }: {
 
   const handlePress = () => {
     Animated.sequence([
-      Animated.timing(scaleAnim, { toValue: 0.96, duration: 80, useNativeDriver: true }),
+      Animated.timing(scaleAnim, { toValue: 0.96, duration: 80,  useNativeDriver: true }),
       Animated.timing(scaleAnim, { toValue: 1,    duration: 120, useNativeDriver: true }),
     ]).start();
     onPress();
@@ -66,7 +67,7 @@ function PositionCard({ pos, isSelected, onPress }: {
       <HapticButton
         haptic="light"
         style={[styles.card, {
-          borderColor: isSelected ? colors.accent : 'transparent',
+          borderColor:     isSelected ? colors.accent : 'transparent',
           backgroundColor: isSelected ? colors.accentLight : colors.white,
         }]}
         onPress={handlePress}
@@ -85,13 +86,13 @@ function PositionCard({ pos, isSelected, onPress }: {
 }
 
 export default function HomeScreen() {
-  const [selected, setSelected]         = useState<string[]>([]);
-  const [streak, setStreak]             = useState(0);
-  const [total, setTotal]               = useState(0);
-  const [bestStreak, setBest]           = useState(0);
-  const [motivation, setMotivation]     = useState(MOTIVATIONS[0]);
-  const [userName, setUserName]         = useState('');
-  const [lastSession, setLastSession]   = useState<string | null>(null);
+  const [selected, setSelected]       = useState<string[]>([]);
+  const [streak, setStreak]           = useState(0);
+  const [total, setTotal]             = useState(0);
+  const [bestStreak, setBest]         = useState(0);
+  const [motivation, setMotivation]   = useState(MOTIVATIONS[0]);
+  const [userName, setUserName]       = useState('');
+  const [lastSession, setLastSession] = useState<string | null>(null);
   const router = useRouter();
 
   useFocusEffect(
@@ -117,26 +118,24 @@ export default function HomeScreen() {
     }, [])
   );
 
-  const toggle = (id: string) => {
-    setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
-  };
-  const selectAll = () => setSelected(positions.map(p => p.id));
-  const isSelected = (id: string) => selected.includes(id);
+  const toggle      = (id: string) => setSelected(prev =>
+    prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+  );
+  const selectAll   = () => setSelected(positions.map(p => p.id));
+  const isSelected  = (id: string) => selected.includes(id);
   const allSelected = selected.length === positions.length;
 
-  const greetingName = userName.trim() ? `, ${userName.trim().split(' ')[0]}` : '';
+  const greetingName      = userName.trim() ? `, ${userName.trim().split(' ')[0]}` : '';
   const lastStretchedLabel = getLastStretchedLabel(lastSession);
-  const stretchedToday = lastSession === new Date().toISOString().split('T')[0];
+  const stretchedToday    = lastSession === new Date().toISOString().split('T')[0];
 
   return (
     <>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.background} />
-      <LinearGradient
-        colors={['#FAF7F2', '#F5EDE0']}
-        style={styles.gradient}
-      >
+      <StatusBar barStyle="dark-content" />
+      <LinearGradient colors={['#FAF7F2', '#F5EDE0']} style={styles.gradient}>
+        <FloatingOrbs />
         <SafeAreaView style={styles.container}>
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
 
             {/* Hero header */}
             <View style={styles.header}>
@@ -165,12 +164,12 @@ export default function HomeScreen() {
                   <Text style={styles.streakDays}>days</Text>
                 </View>
                 <Text style={styles.streakSubtext}>
-                  {streak === 0   ? 'Start your streak today' :
-                   streak < 3     ? "You're just getting started" :
-                   streak < 7     ? "Keep the fire burning" :
-                   streak < 14    ? "You're on fire" :
-                   streak < 30    ? "Unstoppable" :
-                                    "Legendary status"}
+                  {streak === 0  ? 'Start your streak today'    :
+                   streak < 3    ? "You're just getting started" :
+                   streak < 7    ? "Keep the fire burning"       :
+                   streak < 14   ? "You're on fire"              :
+                   streak < 30   ? "Unstoppable"                 :
+                                   "Legendary status"}
                 </Text>
               </View>
               <View style={styles.streakRight}>
@@ -181,7 +180,7 @@ export default function HomeScreen() {
             {/* Stats row */}
             <View style={styles.statsRow}>
               <View style={styles.statCard}>
-                <AnimatedNumber value={total} duration={1200} style={styles.statNumber} />
+                <AnimatedNumber value={total}      duration={1200} style={styles.statNumber} />
                 <Text style={styles.statLabel}>Total Sessions</Text>
               </View>
               <View style={styles.statCard}>
@@ -209,7 +208,7 @@ export default function HomeScreen() {
             <HapticButton
               haptic="light"
               style={[styles.allButton, {
-                borderColor: allSelected ? colors.accent : colors.border,
+                borderColor:     allSelected ? colors.accent : colors.border,
                 backgroundColor: allSelected ? colors.accentLight : 'transparent',
               }]}
               onPress={selectAll}
@@ -219,7 +218,7 @@ export default function HomeScreen() {
 
             {selected.length > 0 && (
               <GradientButton
-                label={`Let's Stretch  →`}
+                label="Let's Stretch  →"
                 haptic="medium"
                 style={{ marginTop: 8 }}
                 onPress={() => router.push({ pathname: '/bodypart', params: { positions: selected.join(',') } })}
@@ -234,59 +233,43 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  gradient:        { flex: 1 },
-  container:       { flex: 1, paddingHorizontal: 20 },
+  gradient:                  { flex: 1 },
+  container:                 { flex: 1, paddingHorizontal: 20 },
 
-  header:          { marginTop: 12, marginBottom: 20 },
-  greeting:        { fontSize: 32, fontWeight: '800', color: colors.textDark, letterSpacing: -0.5 },
-  heroBadgeRow:    { flexDirection: 'row', marginTop: 8, marginBottom: 6 },
-  lastStretchedBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  lastStretchedBadgeSuccess: {
-    backgroundColor: '#EDFAF2',
-    borderColor: '#6FCF97',
-  },
-  lastStretchedText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: colors.textMid,
-  },
-  lastStretchedTextSuccess: {
-    color: '#27AE60',
-  },
-  tagline:         { fontSize: 14, color: colors.textMid, fontStyle: 'italic' },
+  header:                    { marginTop: 12, marginBottom: 20 },
+  greeting:                  { fontSize: 32, fontWeight: '800', color: colors.textDark, letterSpacing: -0.5 },
+  heroBadgeRow:              { flexDirection: 'row', marginTop: 8, marginBottom: 6 },
+  lastStretchedBadge:        { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.border },
+  lastStretchedBadgeSuccess: { backgroundColor: '#EDFAF2', borderColor: '#6FCF97' },
+  lastStretchedText:         { fontSize: 12, fontWeight: '600', color: colors.textMid },
+  lastStretchedTextSuccess:  { color: '#27AE60' },
+  tagline:                   { fontSize: 14, color: colors.textMid, fontStyle: 'italic' },
 
-  streakHero:      { borderRadius: 24, padding: 22, flexDirection: 'row', alignItems: 'center', marginBottom: 14, shadowColor: '#E8924A', shadowOpacity: 0.4, shadowRadius: 18, shadowOffset: { width: 0, height: 8 }, elevation: 8 },
-  streakLeft:      { flex: 1 },
-  streakLabel:     { color: '#FFFFFFCC', fontSize: 11, fontWeight: '700', letterSpacing: 1.5, marginBottom: 4 },
-  streakRow:       { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
-  streakNumber:    { fontSize: 56, fontWeight: '900', color: '#FFFFFF', lineHeight: 60 },
-  streakDays:      { fontSize: 18, fontWeight: '700', color: '#FFFFFFE6' },
-  streakSubtext:   { fontSize: 13, color: '#FFFFFFE0', marginTop: 4, fontWeight: '500' },
-  streakRight:     { paddingLeft: 16 },
+  streakHero:    { borderRadius: 24, padding: 22, flexDirection: 'row', alignItems: 'center', marginBottom: 14, shadowColor: '#E8924A', shadowOpacity: 0.4, shadowRadius: 18, shadowOffset: { width: 0, height: 8 }, elevation: 8 },
+  streakLeft:    { flex: 1 },
+  streakLabel:   { color: '#FFFFFFCC', fontSize: 11, fontWeight: '700', letterSpacing: 1.5, marginBottom: 4 },
+  streakRow:     { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
+  streakNumber:  { fontSize: 56, fontWeight: '900', color: '#FFFFFF', lineHeight: 60 },
+  streakDays:    { fontSize: 18, fontWeight: '700', color: '#FFFFFFE6' },
+  streakSubtext: { fontSize: 13, color: '#FFFFFFE0', marginTop: 4, fontWeight: '500' },
+  streakRight:   { paddingLeft: 16 },
 
-  statsRow:        { flexDirection: 'row', gap: 10, marginBottom: 32 },
-  statCard:        { flex: 1, backgroundColor: colors.white, borderRadius: 16, padding: 16, alignItems: 'center', ...shadows.card },
-  statNumber:      { fontSize: 28, fontWeight: '800', color: colors.textDark, marginBottom: 2 },
-  statLabel:       { fontSize: 11, color: colors.textMid, fontWeight: '600', letterSpacing: 0.5 },
+  statsRow:      { flexDirection: 'row', gap: 10, marginBottom: 32 },
+  statCard:      { flex: 1, backgroundColor: colors.white, borderRadius: 16, padding: 16, alignItems: 'center', ...shadows.card },
+  statNumber:    { fontSize: 28, fontWeight: '800', color: colors.textDark, marginBottom: 2 },
+  statLabel:     { fontSize: 11, color: colors.textMid, fontWeight: '600', letterSpacing: 0.5 },
 
   sectionTitle:    { fontSize: 22, fontWeight: '800', color: colors.textDark, marginBottom: 4 },
   sectionSubtitle: { fontSize: 14, color: colors.textMid, marginBottom: 16 },
 
-  cards:           { flexDirection: 'row', gap: 10, marginBottom: 12 },
-  card:            { borderRadius: 18, paddingVertical: 22, paddingHorizontal: 8, alignItems: 'center', borderWidth: 2, position: 'relative', ...shadows.card },
-  cardEmoji:       { fontSize: 28, marginBottom: 8 },
-  cardLabel:       { fontSize: 13, fontWeight: '700', textAlign: 'center', marginBottom: 2 },
-  cardDesc:        { fontSize: 11, color: colors.textMid, textAlign: 'center' },
-  checkCircle:     { position: 'absolute', top: 8, right: 8, width: 20, height: 20, borderRadius: 10, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center' },
-  checkMark:       { color: colors.white, fontSize: 11, fontWeight: '700' },
+  cards:      { flexDirection: 'row', gap: 10, marginBottom: 12 },
+  card:       { borderRadius: 18, paddingVertical: 22, paddingHorizontal: 8, alignItems: 'center', borderWidth: 2, position: 'relative', ...shadows.card },
+  cardEmoji:  { fontSize: 28, marginBottom: 8 },
+  cardLabel:  { fontSize: 13, fontWeight: '700', textAlign: 'center', marginBottom: 2 },
+  cardDesc:   { fontSize: 11, color: colors.textMid, textAlign: 'center' },
+  checkCircle:{ position: 'absolute', top: 8, right: 8, width: 20, height: 20, borderRadius: 10, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center' },
+  checkMark:  { color: colors.white, fontSize: 11, fontWeight: '700' },
 
-  allButton:       { borderRadius: 16, padding: 14, marginBottom: 12, borderWidth: 2, alignItems: 'center' },
-  allButtonText:   { fontSize: 14, fontWeight: '600', color: colors.accent },
+  allButton:     { borderRadius: 16, padding: 14, marginBottom: 12, borderWidth: 2, alignItems: 'center' },
+  allButtonText: { fontSize: 14, fontWeight: '600', color: colors.accent },
 });
