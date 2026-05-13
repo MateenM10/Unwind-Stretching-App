@@ -2,7 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { RefreshControl, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import AnimatedNumber from '../../components/AnimatedNumber';
 import Skeleton from '../../components/Skeleton';
 import { StreakData, getStreakData, getWeeklyData } from '../../utils/streaks';
 import { colors, gradient, shadows, shared } from '../../utils/theme';
@@ -32,20 +33,28 @@ const formatTime = (seconds: number) => {
 };
 
 export default function ProgressScreen() {
-  const [data, setData]     = useState<StreakData | null>(null);
-  const [weekly, setWeekly] = useState<number[]>(Array(7).fill(0));
+  const [data, setData]         = useState<StreakData | null>(null);
+  const [weekly, setWeekly]     = useState<number[]>(Array(7).fill(0));
+  const [refreshing, setRefreshing] = useState(false);
+
+  const load = useCallback(async () => {
+    const streakData = await getStreakData();
+    setData(streakData);
+    setWeekly(getWeeklyData(streakData.sessionHistory));
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
-      setData(null); // reset so skeleton shows on re-focus
-      const load = async () => {
-        const streakData = await getStreakData();
-        setData(streakData);
-        setWeekly(getWeeklyData(streakData.sessionHistory));
-      };
+      setData(null);
       load();
-    }, [])
+    }, [load])
   );
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await load();
+    setRefreshing(false);
+  };
 
   const isLoading = data === null;
   const maxBar    = Math.max(...weekly, 1);
@@ -55,7 +64,19 @@ export default function ProgressScreen() {
       <StatusBar barStyle="dark-content" />
       <LinearGradient colors={gradient.screen} style={{ flex: 1 }}>
         <SafeAreaView style={styles.container}>
-          <ScrollView showsVerticalScrollIndicator={false}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor={colors.accent}
+                colors={[colors.accent]}
+                title="Refreshing..."
+                titleColor={colors.textMid}
+              />
+            }
+          >
             <Text style={shared.screenTitle}>Your Progress</Text>
             <Text style={[shared.subtitle, styles.subtitleLeft]}>Keep showing up</Text>
 
@@ -64,13 +85,13 @@ export default function ProgressScreen() {
               {isLoading ? (
                 <>
                   <Skeleton width={48} height={48} borderRadius={24} style={{ marginBottom: 12 }} />
-                  <Skeleton width={80} height={64} borderRadius={8} style={{ marginBottom: 8 }} />
+                  <Skeleton width={80} height={64} borderRadius={8}  style={{ marginBottom: 8  }} />
                   <Skeleton width={100} height={16} borderRadius={8} />
                 </>
               ) : (
                 <>
                   <Text style={styles.streakEmoji}>{getStreakEmoji(data.currentStreak)}</Text>
-                  <Text style={styles.streakNumber}>{data.currentStreak}</Text>
+                  <AnimatedNumber value={data.currentStreak} duration={800} style={styles.streakNumber} />
                   <Text style={styles.streakLabel}>Day Streak</Text>
                 </>
               )}
@@ -86,16 +107,20 @@ export default function ProgressScreen() {
                   </View>
                 ))
               ) : (
-                [
-                  { value: data.totalSessions,                 label: 'Sessions'    },
-                  { value: formatTime(data.totalTimeSeconds),  label: 'Total Time'  },
-                  { value: data.longestStreak,                 label: 'Best Streak' },
-                ].map((stat, i) => (
-                  <View key={i} style={styles.statCard}>
-                    <Text style={styles.statNumber}>{stat.value}</Text>
-                    <Text style={styles.statLabel}>{stat.label}</Text>
+                <>
+                  <View style={styles.statCard}>
+                    <AnimatedNumber value={data.totalSessions}  duration={1000} style={styles.statNumber} />
+                    <Text style={styles.statLabel}>Sessions</Text>
                   </View>
-                ))
+                  <View style={styles.statCard}>
+                    <Text style={styles.statNumber}>{formatTime(data.totalTimeSeconds)}</Text>
+                    <Text style={styles.statLabel}>Total Time</Text>
+                  </View>
+                  <View style={styles.statCard}>
+                    <AnimatedNumber value={data.longestStreak} duration={1000} style={styles.statNumber} />
+                    <Text style={styles.statLabel}>Best Streak</Text>
+                  </View>
+                </>
               )}
             </View>
 
@@ -107,7 +132,7 @@ export default function ProgressScreen() {
                   <View key={i} style={styles.barColumn}>
                     <View style={styles.barTrack}>
                       {isLoading ? (
-                        <Skeleton width="100%" height={20 + Math.random() * 40} borderRadius={6} />
+                        <Skeleton width="100%" height={20} borderRadius={6} />
                       ) : (
                         <View style={[
                           styles.barFill,
@@ -146,9 +171,7 @@ export default function ProgressScreen() {
                       <Text style={[styles.milestoneLabel, reached && styles.milestoneLabelReached]}>
                         {m.label}
                       </Text>
-                      {reached && (
-                        <Ionicons name="checkmark-circle" size={18} color={colors.accent} />
-                      )}
+                      {reached && <Ionicons name="checkmark-circle" size={18} color={colors.accent} />}
                     </View>
                   );
                 })
@@ -166,27 +189,22 @@ export default function ProgressScreen() {
 const styles = StyleSheet.create({
   container:             { flex: 1, padding: 24 },
   subtitleLeft:          { textAlign: 'left', marginBottom: 24 },
-
   streakCard:            { backgroundColor: colors.white, borderRadius: 24, padding: 32, alignItems: 'center', marginBottom: 16, borderWidth: 2, borderColor: colors.accent, ...shadows.accent },
   streakEmoji:           { fontSize: 48, marginBottom: 8 },
   streakNumber:          { fontSize: 64, fontWeight: '700', color: colors.textDark, lineHeight: 70 },
   streakLabel:           { fontSize: 16, color: colors.textMid, marginTop: 4 },
-
   statsGrid:             { flexDirection: 'row', gap: 10, marginBottom: 16 },
   statCard:              { flex: 1, backgroundColor: colors.white, borderRadius: 16, padding: 18, alignItems: 'center', ...shadows.card },
   statNumber:            { fontSize: 22, fontWeight: '700', color: colors.textDark, marginBottom: 4 },
   statLabel:             { fontSize: 12, color: colors.textMid },
-
   sectionCard:           { backgroundColor: colors.white, borderRadius: 20, padding: 20, marginBottom: 16, ...shadows.card },
   sectionTitle:          { color: colors.textDark, fontSize: 16, fontWeight: '600', marginBottom: 16 },
-
   chartRow:              { flexDirection: 'row', justifyContent: 'space-between', height: 100, alignItems: 'flex-end' },
   barColumn:             { alignItems: 'center', flex: 1 },
   barTrack:              { width: 24, height: 80, backgroundColor: colors.border, borderRadius: 6, justifyContent: 'flex-end', marginBottom: 6, overflow: 'hidden' },
   barFill:               { width: '100%', borderRadius: 6, minHeight: 4 },
   barLabel:              { color: colors.textLight, fontSize: 10 },
   barCount:              { color: colors.accent, fontSize: 10, fontWeight: '700' },
-
   milestoneRow:          { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#F5EFE6' },
   milestone:             { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#F5EFE6', opacity: 0.4 },
   milestoneReached:      { opacity: 1 },

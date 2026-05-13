@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { RefreshControl, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ALL_STRETCHES } from '../../utils/stretches';
 import { colors, gradient, shadows, shared } from '../../utils/theme';
 import { getFavourites, getWeights, toggleFavourite } from '../../utils/weights';
@@ -28,18 +28,26 @@ export default function LibraryScreen() {
   const [weights, setWeights]       = useState<Record<string, number>>({});
   const [filter, setFilter]         = useState<'all' | 'favourites'>('all');
   const [collapsed, setCollapsed]   = useState<Record<string, boolean>>({});
+  const [refreshing, setRefreshing] = useState(false);
+
+  const load = useCallback(async () => {
+    const favs = await getFavourites();
+    const w    = await getWeights();
+    setFavourites(favs);
+    setWeights(w);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
-      const load = async () => {
-        const favs = await getFavourites();
-        const w    = await getWeights();
-        setFavourites(favs);
-        setWeights(w);
-      };
       load();
-    }, [])
+    }, [load])
   );
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await load();
+    setRefreshing(false);
+  };
 
   const handleFavourite = async (id: string) => {
     const updated = await toggleFavourite(id);
@@ -83,11 +91,7 @@ export default function LibraryScreen() {
                 onPress={() => setFilter(f)}
               >
                 {f === 'favourites' && (
-                  <Ionicons
-                    name="heart"
-                    size={13}
-                    color={filter === f ? colors.white : colors.textMid}
-                  />
+                  <Ionicons name="heart" size={13} color={filter === f ? colors.white : colors.textMid} />
                 )}
                 <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>
                   {f === 'all' ? 'All' : 'Favourites'}
@@ -96,9 +100,23 @@ export default function LibraryScreen() {
             ))}
           </View>
 
-          <ScrollView showsVerticalScrollIndicator={false}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor={colors.accent}
+                colors={[colors.accent]}
+                title="Refreshing your stretches..."
+                titleColor={colors.textMid}
+              />
+            }
+          >
             {Object.keys(grouped).length === 0 && (
-              <Text style={shared.emptyText}>No favourites yet — heart a stretch during a session!</Text>
+              <Text style={shared.emptyText}>
+                No favourites yet — heart a stretch during a session!
+              </Text>
             )}
 
             {Object.entries(grouped).map(([muscle, stretches]) => {
@@ -127,7 +145,9 @@ export default function LibraryScreen() {
                           <View style={styles.cardMeta}>
                             <Text style={styles.cardDuration}>{stretch.duration}s</Text>
                             <Text style={styles.cardDot}>·</Text>
-                            <Text style={[styles.cardWeight, { color: weightInfo.color }]}>{weightInfo.label}</Text>
+                            <Text style={[styles.cardWeight, { color: weightInfo.color }]}>
+                              {weightInfo.label}
+                            </Text>
                           </View>
                         </View>
                         <TouchableOpacity onPress={() => handleFavourite(stretch.id)} style={styles.heartButton}>
