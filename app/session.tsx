@@ -62,6 +62,10 @@ export default function SessionScreen() {
   const halfwaySpokenRef = useRef(false);
   const endSpokenRef     = useRef(false);
   const cardAnim         = useRef(new Animated.Value(0)).current;
+  // Mirrors voiceEnabled so speak() always reads the latest value, even when
+  // called synchronously right after setVoiceEnabled() in the same handler
+  // (state updates aren't visible in the closure until the next render).
+  const voiceEnabledRef  = useRef(true);
 
   const current       = stretches[index];
   const isLast        = index === stretches.length - 1;
@@ -70,7 +74,7 @@ export default function SessionScreen() {
   const isBreathingIn = breathingCue === 'Breathe in...';
 
   const speak = (text: string) => {
-    if (!voiceEnabled) return;
+    if (!voiceEnabledRef.current) return;
     Speech.stop();
     Speech.speak(text, { rate: 0.9, pitch: 1.0 });
   };
@@ -91,7 +95,7 @@ export default function SessionScreen() {
     endSpokenRef.current     = false;
     lastBreathRef.current    = '';
     speak(`${current.name}. ${(current as any).tip ?? ''}`);
-  }, [index, voiceEnabled]);
+  }, [index]);
 
   useEffect(() => {
     const load = async () => {
@@ -135,7 +139,7 @@ export default function SessionScreen() {
       });
     }, 1000);
     return () => clearInterval(intervalRef.current!);
-  }, [isRunning, index, voiceEnabled]);
+  }, [isRunning, index]);
 
   useEffect(() => {
     if (timeLeft === 0) {
@@ -158,6 +162,7 @@ export default function SessionScreen() {
   };
 
   const toggleVoice = (val: boolean) => {
+    voiceEnabledRef.current = val;
     setVoiceEnabled(val);
     if (!val) Speech.stop(); else speak('Voice guidance on.');
   };

@@ -5,10 +5,8 @@ import { useCallback, useState } from 'react';
 import { RefreshControl, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import AnimatedNumber from '../../components/AnimatedNumber';
 import Skeleton from '../../components/Skeleton';
-import { StreakData, getStreakData, getWeeklyData } from '../../utils/streaks';
+import { StreakData, getStreakData, getWeekdayLabels, getWeeklyData } from '../../utils/streaks';
 import { colors, gradient, shadows, shared } from '../../utils/theme';
-
-const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const MILESTONES = [
   { days: 3,  label: '3 Day Streak',  emoji: '✨' },
@@ -36,6 +34,7 @@ export default function ProgressScreen() {
   const [data, setData]         = useState<StreakData | null>(null);
   const [weekly, setWeekly]     = useState<number[]>(Array(7).fill(0));
   const [refreshing, setRefreshing] = useState(false);
+  const dayLabels = getWeekdayLabels();
 
   const load = useCallback(async () => {
     const streakData = await getStreakData();
@@ -128,7 +127,7 @@ export default function ProgressScreen() {
             <View style={styles.sectionCard}>
               <Text style={styles.sectionTitle}>This Week</Text>
               <View style={styles.chartRow}>
-                {DAY_LABELS.map((day, i) => (
+                {dayLabels.map((day, i) => (
                   <View key={i} style={styles.barColumn}>
                     <View style={styles.barTrack}>
                       {isLoading ? (

@@ -89,3 +89,17 @@ export const getWeeklyData = (history: { date: string }[]): number[] => {
   });
   return days;
 };
+
+// Returns real weekday labels (e.g. "Wed") for the last 7 calendar days,
+// oldest first and today last — aligned index-for-index with getWeeklyData's
+// output, instead of a fixed "Mon..Sun" that only matches on Sundays.
+export const getWeekdayLabels = (): string[] => {
+  const labels: string[] = [];
+  const today = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    labels.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
+  }
+  return labels;
+};
