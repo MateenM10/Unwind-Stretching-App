@@ -49,9 +49,15 @@ export const weightedShuffle = (
   stretches: any[],
   weights: Record<string, number>
 ): any[] => {
-  const weighted = stretches.map(s => ({
-    ...s,
-    _weight: weights[s.id] ?? 1.0,
-  }));
-  return weighted.sort(() => Math.random() - 0.5 / weighted.reduce((a, b) => a + b._weight, 0));
+  // Efraimidis-Spirakis weighted random sampling: each item gets a key of
+  // random^(1/weight). Higher weight pushes the key closer to 1, so sorting
+  // descending by key surfaces favourited (higher-weight) stretches more
+  // often, while still keeping the order different every session.
+  const keyed = stretches.map(s => {
+    const weight = weights[s.id] ?? 1.0;
+    const key = Math.pow(Math.random(), 1 / weight);
+    return { stretch: s, key };
+  });
+  keyed.sort((a, b) => b.key - a.key);
+  return keyed.map(k => k.stretch);
 };
