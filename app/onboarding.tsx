@@ -154,9 +154,14 @@ export default function OnboardingScreen() {
           {/* Animated dot indicators */}
           <View style={styles.dots}>
             {SLIDES.map((_, i) => {
-              const dotWidth = scrollX.interpolate({
+              // Native driver can only animate `transform` and `opacity` —
+              // animating `width` directly throws at runtime once scrollX is
+              // driven natively. scaleX gives the same grow/shrink look
+              // while keeping each dot's layout box (and the row's total
+              // width) constant, avoiding any layout shift as you swipe.
+              const dotScale = scrollX.interpolate({
                 inputRange: [(i - 1) * width, i * width, (i + 1) * width],
-                outputRange: [8, 24, 8],
+                outputRange: [8 / 24, 1, 8 / 24],
                 extrapolate: 'clamp',
               });
               const dotOpacity = scrollX.interpolate({
@@ -165,7 +170,10 @@ export default function OnboardingScreen() {
                 extrapolate: 'clamp',
               });
               return (
-                <Animated.View key={i} style={[styles.dot, { width: dotWidth, opacity: dotOpacity }]} />
+                <Animated.View
+                  key={i}
+                  style={[styles.dot, { opacity: dotOpacity, transform: [{ scaleX: dotScale }] }]}
+                />
               );
             })}
           </View>
@@ -218,7 +226,7 @@ const styles = StyleSheet.create({
   desc:           { fontSize: 17, color: colors.textMid, textAlign: 'center', lineHeight: 26 },
 
   dots:           { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, marginBottom: 24 },
-  dot:            { height: 8, borderRadius: 4, backgroundColor: colors.accent },
+  dot:            { width: 24, height: 8, borderRadius: 4, backgroundColor: colors.accent },
 
   cta:            { marginHorizontal: 24, marginBottom: 24 },
 });
