@@ -30,10 +30,9 @@ const getBreathingCue = (timeLeft: number, totalDuration: number): string => {
 };
 
 export default function SessionScreen() {
-  const { positions, bodyPart, feeling } = useLocalSearchParams<{
+  const { positions, bodyPart } = useLocalSearchParams<{
     positions: string;
     bodyPart: string;
-    feeling: string;
   }>();
   const router = useRouter();
 
@@ -42,9 +41,8 @@ export default function SessionScreen() {
 
   const allFiltered = ALL_STRETCHES.filter(s => {
     const matchesPosition = s.positions.some(p => selectedPositions.includes(p));
-    const matchesBodyPart = bodyPart === 'general' || selectedBodyParts.includes(s.muscle);
-    const matchesFeeling  = !feeling || (s as any).feelings?.includes(feeling);
-    return matchesPosition && matchesBodyPart && matchesFeeling;
+    const matchesBodyPart = selectedBodyParts.includes(s.muscle);
+    return matchesPosition && matchesBodyPart;
   });
 
   const [stretches, setStretches]           = useState<Stretch[]>(allFiltered);
