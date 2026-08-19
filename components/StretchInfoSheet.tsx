@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import React from 'react';
 import {
@@ -58,7 +59,7 @@ export default function StretchInfoSheet({ visible, onClose, stretchId, stretchN
               </View>
             ) : (
               <View style={styles.animationPlaceholder}>
-                <Text style={styles.placeholderEmoji}>🧘</Text>
+                <Ionicons name="body-outline" size={40} color={colors.textLight} style={{ marginBottom: 8 }} />
                 <Text style={styles.placeholderText}>Animation coming soon</Text>
               </View>
             )}
@@ -96,7 +97,6 @@ const styles = StyleSheet.create({
   animationBox:         { backgroundColor: colors.white, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginBottom: 24, height: 200, overflow: 'hidden' },
   animation:            { width: '100%', height: 200 },
   animationPlaceholder: { backgroundColor: colors.white, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginBottom: 24, height: 160, borderWidth: 1, borderColor: colors.border },
-  placeholderEmoji:     { fontSize: 40, marginBottom: 8 },
   placeholderText:      { fontSize: 13, color: colors.textLight },
   stepsTitle:           { fontSize: 16, fontWeight: '700', color: colors.textDark, marginBottom: 16 },
   stepRow:              { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 14, gap: 12 },

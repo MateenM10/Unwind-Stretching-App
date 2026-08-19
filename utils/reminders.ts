@@ -4,13 +4,13 @@ import * as Notifications from 'expo-notifications';
 const REMINDERS_KEY = 'reminder_times';
 
 const MESSAGES = [
-  "Time to stretch! Your body will thank you 🧘",
-  "Quick stretch break? You've earned it 💪",
-  "30 seconds is all it takes — let's go 🌟",
-  "Your muscles are calling. Time to stretch! 🔥",
-  "Stretch break time! Feel better in minutes ✨",
-  "Don't forget to move — your body needs it 🙆",
-  "A little stretch goes a long way 💫",
+  "Time to stretch! Your body will thank you.",
+  "Quick stretch break? You've earned it.",
+  "30 seconds is all it takes — let's go.",
+  "Your muscles are calling. Time to stretch!",
+  "Stretch break time! Feel better in minutes.",
+  "Don't forget to move — your body needs it.",
+  "A little stretch goes a long way.",
 ];
 
 Notifications.setNotificationHandler({
@@ -47,7 +47,7 @@ export const scheduleReminders = async (times: string[]): Promise<void> => {
 
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: "Stretch App 🧘",
+          title: "Stretch App",
           body: message,
         },
         trigger: {

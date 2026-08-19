@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -11,10 +12,10 @@ import HapticButton from '../../components/HapticButton';
 import { getStreakData } from '../../utils/streaks';
 import { colors, shadows } from '../../utils/theme';
 
-const positions = [
-  { id: 'couch',    label: '🛋️', name: 'On the Couch', desc: 'Seated'  },
-  { id: 'standing', label: '🧍', name: 'Standing',      desc: 'Upright' },
-  { id: 'lying',    label: '🛏️', name: 'Lying Down',    desc: 'Floor'   },
+const positions: { id: string; icon: keyof typeof Ionicons.glyphMap; name: string; desc: string }[] = [
+  { id: 'couch',    icon: 'body-outline',  name: 'On the Couch', desc: 'Seated'  },
+  { id: 'standing', icon: 'walk-outline',  name: 'Standing',      desc: 'Upright' },
+  { id: 'lying',    icon: 'bed-outline',   name: 'Lying Down',    desc: 'Floor'   },
 ];
 
 const MOTIVATIONS = [
@@ -72,7 +73,12 @@ function PositionCard({ pos, isSelected, onPress }: {
         }]}
         onPress={handlePress}
       >
-        <Text style={styles.cardEmoji}>{pos.label}</Text>
+        <Ionicons
+          name={pos.icon}
+          size={26}
+          color={isSelected ? colors.accent : colors.textMid}
+          style={styles.cardIcon}
+        />
         <Text style={[styles.cardLabel, { color: isSelected ? colors.accent : colors.textDark }]}>
           {pos.name}
         </Text>
@@ -264,7 +270,7 @@ const styles = StyleSheet.create({
 
   cards:      { flexDirection: 'row', gap: 10, marginBottom: 12 },
   card:       { borderRadius: 18, paddingVertical: 22, paddingHorizontal: 8, alignItems: 'center', borderWidth: 2, position: 'relative', ...shadows.card },
-  cardEmoji:  { fontSize: 28, marginBottom: 8 },
+  cardIcon:   { marginBottom: 8 },
   cardLabel:  { fontSize: 13, fontWeight: '700', textAlign: 'center', marginBottom: 2 },
   cardDesc:   { fontSize: 11, color: colors.textMid, textAlign: 'center' },
   checkCircle:{ position: 'absolute', top: 8, right: 8, width: 20, height: 20, borderRadius: 10, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center' },

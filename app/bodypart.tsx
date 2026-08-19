@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
@@ -6,17 +7,17 @@ import GradientButton from '../components/GradientButton';
 import HapticButton from '../components/HapticButton';
 import { colors, gradient, shadows, shared } from '../utils/theme';
 
-const BODY_PARTS = [
-  { id: 'neck',       emoji: '🙆',  name: 'Neck'       },
-  { id: 'shoulders',  emoji: '💪',  name: 'Shoulders'  },
-  { id: 'chest',      emoji: '❤️',  name: 'Chest'      },
-  { id: 'back',       emoji: '🔄',  name: 'Back'       },
-  { id: 'hips',       emoji: '🌀',  name: 'Hips'       },
-  { id: 'glutes',     emoji: '🍑',  name: 'Glutes'     },
-  { id: 'quads',      emoji: '🦵',  name: 'Quads'      },
-  { id: 'hamstrings', emoji: '🦵',  name: 'Hamstrings' },
-  { id: 'calves',     emoji: '🦶',  name: 'Calves'     },
-  { id: 'ankles',     emoji: '🔁',  name: 'Ankles'     },
+const BODY_PARTS: { id: string; icon: keyof typeof Ionicons.glyphMap; name: string }[] = [
+  { id: 'neck',       icon: 'body-outline',       name: 'Neck'       },
+  { id: 'shoulders',  icon: 'barbell-outline',     name: 'Shoulders'  },
+  { id: 'chest',      icon: 'heart-outline',       name: 'Chest'      },
+  { id: 'back',       icon: 'sync-outline',        name: 'Back'       },
+  { id: 'hips',       icon: 'disc-outline',        name: 'Hips'       },
+  { id: 'glutes',     icon: 'ellipse-outline',     name: 'Glutes'     },
+  { id: 'quads',      icon: 'walk-outline',        name: 'Quads'      },
+  { id: 'hamstrings', icon: 'trending-up-outline', name: 'Hamstrings' },
+  { id: 'calves',     icon: 'footsteps-outline',   name: 'Calves'     },
+  { id: 'ankles',     icon: 'repeat-outline',      name: 'Ankles'     },
 ];
 
 function BodyPartCard({ part, isSelected, onPress }: {
@@ -47,7 +48,12 @@ function BodyPartCard({ part, isSelected, onPress }: {
         ]}
         onPress={handlePress}
       >
-        <Text style={styles.gridEmoji}>{part.emoji}</Text>
+        <Ionicons
+          name={part.icon}
+          size={28}
+          color={isSelected ? colors.accent : colors.textMid}
+          style={styles.gridIcon}
+        />
         <Text style={[styles.gridName, { color: isSelected ? colors.accent : colors.textDark }]}>
           {part.name}
         </Text>
@@ -141,7 +147,7 @@ const styles = StyleSheet.create({
   grid:         { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 14 },
   cardWrapper:  { width: '47.5%' },
   gridCard:     { borderRadius: 16, paddingVertical: 24, paddingHorizontal: 8, alignItems: 'center', borderWidth: 2, position: 'relative', ...shadows.card },
-  gridEmoji:    { fontSize: 30, marginBottom: 8 },
+  gridIcon:     { marginBottom: 8 },
   gridName:     { fontSize: 14, fontWeight: '600', textAlign: 'center' },
   checkCircle:  { position: 'absolute', top: 8, right: 8, width: 20, height: 20, borderRadius: 10, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center' },
   checkMark:    { color: colors.white, fontSize: 11, fontWeight: '700' },

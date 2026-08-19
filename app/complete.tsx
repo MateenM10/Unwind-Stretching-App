@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
@@ -45,12 +46,12 @@ export default function CompleteScreen() {
     ]).start();
   }, []);
 
-  const getStreakMessage = () => {
-    if (streakNum >= 30) return '🏆 30 day streak — incredible!';
-    if (streakNum >= 14) return '🔥 14 days strong!';
-    if (streakNum >= 7)  return '⚡ One week streak!';
-    if (streakNum >= 3)  return '✨ 3 days in a row!';
-    return '💪 Keep it up!';
+  const getStreakMessage = (): { icon: keyof typeof Ionicons.glyphMap; text: string } => {
+    if (streakNum >= 30) return { icon: 'trophy',        text: '30 day streak — incredible!' };
+    if (streakNum >= 14) return { icon: 'flame',         text: '14 days strong!'              };
+    if (streakNum >= 7)  return { icon: 'flash',         text: 'One week streak!'             };
+    if (streakNum >= 3)  return { icon: 'sparkles',      text: '3 days in a row!'              };
+    return                      { icon: 'barbell-outline', text: 'Keep it up!'                 };
   };
 
   return (
@@ -72,7 +73,7 @@ export default function CompleteScreen() {
           />
 
           <Animated.View style={[styles.heroSection, toStyle(heroAnim)]}>
-            <Text style={styles.emoji}>🎉</Text>
+            <Ionicons name="sparkles" size={56} color={colors.accent} style={{ marginBottom: 16 }} />
             <Text style={styles.title}>Session Complete!</Text>
             <Text style={shared.subtitle}>Great work — your body thanks you.</Text>
           </Animated.View>
@@ -94,7 +95,8 @@ export default function CompleteScreen() {
           </Animated.View>
 
           <Animated.View style={[styles.streakBanner, toStyle(bannerAnim)]}>
-            <Text style={styles.streakText}>{getStreakMessage()}</Text>
+            <Ionicons name={getStreakMessage().icon} size={18} color={colors.accent} style={{ marginRight: 8 }} />
+            <Text style={styles.streakText}>{getStreakMessage().text}</Text>
           </Animated.View>
 
           <Animated.View style={toStyle(btnsAnim)}>
@@ -124,14 +126,13 @@ export default function CompleteScreen() {
 const styles = StyleSheet.create({
   container:    { flex: 1, padding: 24, justifyContent: 'center' },
   heroSection:  { alignItems: 'center', marginBottom: 40 },
-  emoji:        { fontSize: 64, marginBottom: 16 },
   title:        { fontSize: 32, fontWeight: '700', color: colors.textDark, marginBottom: 8 },
   statsRow:     { flexDirection: 'row', backgroundColor: colors.white, borderRadius: 20, padding: 24, marginBottom: 16, alignItems: 'center', shadowColor: '#C9A96E', shadowOpacity: 0.12, shadowRadius: 16, shadowOffset: { width: 0, height: 6 }, elevation: 4 },
   statCard:     { flex: 1, alignItems: 'center' },
   statNumber:   { fontSize: 22, fontWeight: '700', color: colors.textDark, marginBottom: 4 },
   statLabel:    { fontSize: 12, color: colors.textMid },
   statDivider:  { width: 1, height: 40, backgroundColor: colors.border },
-  streakBanner: { backgroundColor: colors.white, borderRadius: 16, padding: 16, alignItems: 'center', marginBottom: 32, borderWidth: 1, borderColor: colors.border },
+  streakBanner: { flexDirection: 'row', backgroundColor: colors.white, borderRadius: 16, padding: 16, alignItems: 'center', justifyContent: 'center', marginBottom: 32, borderWidth: 1, borderColor: colors.border },
   streakText:   { color: colors.accent, fontSize: 15, fontWeight: '600' },
   secondaryText:{ color: colors.textLight, fontSize: 15 },
 });

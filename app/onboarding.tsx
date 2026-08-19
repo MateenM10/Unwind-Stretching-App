@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, useRouter } from 'expo-router';
@@ -16,21 +17,21 @@ import { colors, gradient, shared } from '../utils/theme';
 
 const { width, height } = Dimensions.get('window');
 
-const SLIDES = [
+const SLIDES: { icon: keyof typeof Ionicons.glyphMap; title: string; desc: string; accent: string }[] = [
   {
-    emoji: '🧘',
+    icon: 'body-outline',
     title: 'Stretch anywhere,\nanytime',
     desc: 'On the couch, standing, or lying down — we meet you where you are.',
     accent: '#FFD4A3',
   },
   {
-    emoji: '🎯',
+    icon: 'locate-outline',
     title: 'Focused or\nfull body',
     desc: 'Target a specific muscle group or stretch everything at once.',
     accent: '#C2D4A3',
   },
   {
-    emoji: '🔥',
+    icon: 'flame',
     title: 'Build a habit\nthat sticks',
     desc: 'Track your streak, favourite your stretches, and get daily reminders.',
     accent: '#FFBCB3',
@@ -137,11 +138,11 @@ export default function OnboardingScreen() {
 
               return (
                 <View key={i} style={styles.slide}>
-                  <Animated.Text
-                    style={[styles.emoji, { transform: [{ scale }, { translateY: emojiTranslateY }] }]}
+                  <Animated.View
+                    style={[styles.iconCircle, { backgroundColor: slide.accent }, { transform: [{ scale }, { translateY: emojiTranslateY }] }]}
                   >
-                    {slide.emoji}
-                  </Animated.Text>
+                    <Ionicons name={slide.icon} size={48} color={colors.textDark} />
+                  </Animated.View>
                   <Animated.View style={{ opacity }}>
                     <Text style={styles.title}>{slide.title}</Text>
                     <Text style={styles.desc}>{slide.desc}</Text>
@@ -181,7 +182,7 @@ export default function OnboardingScreen() {
           {/* CTA */}
           <TouchableOpacity style={[shared.primaryButton, styles.cta]} onPress={goNext}>
             <Text style={shared.primaryButtonText}>
-              {slideIndex === SLIDES.length - 1 ? "Let's Go 🚀" : 'Next →'}
+              {slideIndex === SLIDES.length - 1 ? "Let's Go →" : 'Next →'}
             </Text>
           </TouchableOpacity>
 
@@ -221,7 +222,7 @@ const styles = StyleSheet.create({
 
   scrollView:     { flex: 1 },
   slide:          { width, flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 36 },
-  emoji:          { fontSize: 88, marginBottom: 36, textAlign: 'center' },
+  iconCircle:     { width: 120, height: 120, borderRadius: 60, alignItems: 'center', justifyContent: 'center', marginBottom: 36 },
   title:          { fontSize: 36, fontWeight: '800', color: colors.textDark, textAlign: 'center', lineHeight: 44, marginBottom: 16, letterSpacing: -0.5 },
   desc:           { fontSize: 17, color: colors.textMid, textAlign: 'center', lineHeight: 26 },
 

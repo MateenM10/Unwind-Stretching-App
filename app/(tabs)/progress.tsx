@@ -8,19 +8,19 @@ import Skeleton from '../../components/Skeleton';
 import { StreakData, getStreakData, getWeekdayLabels, getWeeklyData } from '../../utils/streaks';
 import { colors, gradient, shadows, shared } from '../../utils/theme';
 
-const MILESTONES = [
-  { days: 3,  label: '3 Day Streak',  emoji: '✨' },
-  { days: 7,  label: '1 Week Streak', emoji: '⚡' },
-  { days: 14, label: '2 Week Streak', emoji: '🔥' },
-  { days: 30, label: '30 Day Streak', emoji: '🏆' },
+const MILESTONES: { days: number; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { days: 3,  label: '3 Day Streak',  icon: 'sparkles'  },
+  { days: 7,  label: '1 Week Streak', icon: 'flash'     },
+  { days: 14, label: '2 Week Streak', icon: 'flame'     },
+  { days: 30, label: '30 Day Streak', icon: 'trophy'    },
 ];
 
-const getStreakEmoji = (streak: number) => {
-  if (streak >= 30) return '🏆';
-  if (streak >= 14) return '🔥';
-  if (streak >= 7)  return '⚡';
-  if (streak >= 3)  return '✨';
-  return '💪';
+const getStreakIcon = (streak: number): keyof typeof Ionicons.glyphMap => {
+  if (streak >= 30) return 'trophy';
+  if (streak >= 14) return 'flame';
+  if (streak >= 7)  return 'flash';
+  if (streak >= 3)  return 'sparkles';
+  return 'barbell-outline';
 };
 
 const formatTime = (seconds: number) => {
@@ -89,7 +89,7 @@ export default function ProgressScreen() {
                 </>
               ) : (
                 <>
-                  <Text style={styles.streakEmoji}>{getStreakEmoji(data.currentStreak)}</Text>
+                  <Ionicons name={getStreakIcon(data.currentStreak)} size={40} color={colors.accent} style={{ marginBottom: 8 }} />
                   <AnimatedNumber value={data.currentStreak} duration={800} style={styles.streakNumber} />
                   <Text style={styles.streakLabel}>Day Streak</Text>
                 </>
@@ -166,7 +166,12 @@ export default function ProgressScreen() {
                   const reached = data.longestStreak >= m.days;
                   return (
                     <View key={m.days} style={[styles.milestone, reached && styles.milestoneReached]}>
-                      <Text style={styles.milestoneEmoji}>{m.emoji}</Text>
+                      <Ionicons
+                        name={m.icon}
+                        size={20}
+                        color={reached ? colors.accent : colors.textLight}
+                        style={styles.milestoneIcon}
+                      />
                       <Text style={[styles.milestoneLabel, reached && styles.milestoneLabelReached]}>
                         {m.label}
                       </Text>
@@ -189,7 +194,6 @@ const styles = StyleSheet.create({
   container:             { flex: 1, padding: 24 },
   subtitleLeft:          { textAlign: 'left', marginBottom: 24 },
   streakCard:            { backgroundColor: colors.white, borderRadius: 24, padding: 32, alignItems: 'center', marginBottom: 16, borderWidth: 2, borderColor: colors.accent, ...shadows.accent },
-  streakEmoji:           { fontSize: 48, marginBottom: 8 },
   streakNumber:          { fontSize: 64, fontWeight: '700', color: colors.textDark, lineHeight: 70 },
   streakLabel:           { fontSize: 16, color: colors.textMid, marginTop: 4 },
   statsGrid:             { flexDirection: 'row', gap: 10, marginBottom: 16 },
@@ -207,7 +211,7 @@ const styles = StyleSheet.create({
   milestoneRow:          { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#F5EFE6' },
   milestone:             { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#F5EFE6', opacity: 0.4 },
   milestoneReached:      { opacity: 1 },
-  milestoneEmoji:        { fontSize: 20, marginRight: 12 },
+  milestoneIcon:         { marginRight: 12 },
   milestoneLabel:        { color: colors.textMid, fontSize: 15, flex: 1 },
   milestoneLabelReached: { color: colors.textDark },
 });

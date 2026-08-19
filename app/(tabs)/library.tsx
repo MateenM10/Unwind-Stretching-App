@@ -10,17 +10,31 @@ import { getFavourites, getWeights, toggleFavourite } from '../../utils/weights'
 const MUSCLE_ORDER = ['neck', 'shoulders', 'chest', 'back', 'hips', 'glutes', 'quads', 'hamstrings', 'calves', 'ankles', 'general'];
 
 const MUSCLE_LABELS: Record<string, string> = {
-  neck:       '🙆  Neck',
-  shoulders:  '💪  Shoulders',
-  chest:      '❤️  Chest',
-  back:       '🔄  Back',
-  hips:       '🌀  Hips',
-  glutes:     '🍑  Glutes',
-  quads:      '🦵  Quads',
-  hamstrings: '🦵  Hamstrings',
-  calves:     '🦶  Calves',
-  ankles:     '🔁  Ankles',
-  general:    '✨  General',
+  neck:       'Neck',
+  shoulders:  'Shoulders',
+  chest:      'Chest',
+  back:       'Back',
+  hips:       'Hips',
+  glutes:     'Glutes',
+  quads:      'Quads',
+  hamstrings: 'Hamstrings',
+  calves:     'Calves',
+  ankles:     'Ankles',
+  general:    'General',
+};
+
+const MUSCLE_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
+  neck:       'body-outline',
+  shoulders:  'barbell-outline',
+  chest:      'heart-outline',
+  back:       'sync-outline',
+  hips:       'disc-outline',
+  glutes:     'ellipse-outline',
+  quads:      'walk-outline',
+  hamstrings: 'trending-up-outline',
+  calves:     'footsteps-outline',
+  ankles:     'repeat-outline',
+  general:    'sparkles-outline',
 };
 
 export default function LibraryScreen() {
@@ -124,7 +138,10 @@ export default function LibraryScreen() {
               return (
                 <View key={muscle} style={styles.section}>
                   <TouchableOpacity style={styles.sectionHeader} onPress={() => toggleCollapse(muscle)}>
-                    <Text style={styles.sectionTitle}>{MUSCLE_LABELS[muscle]}</Text>
+                    <View style={styles.sectionLeft}>
+                      <Ionicons name={MUSCLE_ICONS[muscle]} size={16} color={colors.textDark} />
+                      <Text style={styles.sectionTitle}>{MUSCLE_LABELS[muscle]}</Text>
+                    </View>
                     <View style={styles.sectionRight}>
                       <Text style={styles.sectionCount}>{stretches.length}</Text>
                       <Ionicons
@@ -182,6 +199,7 @@ const styles = StyleSheet.create({
   filterTextActive: { color: colors.white },
   section:          { marginBottom: 12 },
   sectionHeader:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 4, marginBottom: 8 },
+  sectionLeft:      { flexDirection: 'row', alignItems: 'center', gap: 8 },
   sectionTitle:     { fontSize: 15, fontWeight: '700', color: colors.textDark },
   sectionRight:     { flexDirection: 'row', alignItems: 'center', gap: 8 },
   sectionCount:     { fontSize: 12, color: colors.textLight, fontWeight: '600' },

@@ -6,12 +6,12 @@ import { Alert, SafeAreaView, ScrollView, StatusBar, StyleSheet, Switch, Text, T
 import { cancelAllReminders, getSavedReminders, requestPermissions, scheduleReminders } from '../../utils/reminders';
 import { colors, gradient, shadows, shared } from '../../utils/theme';
 
-const PRESET_TIMES = [
-  { label: '🌅  Morning',    time: '08:00' },
-  { label: '☀️  Midday',     time: '12:00' },
-  { label: '🌤️  Afternoon',  time: '15:00' },
-  { label: '🌆  Evening',    time: '18:00' },
-  { label: '🌙  Before Bed', time: '21:00' },
+const PRESET_TIMES: { label: string; time: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { label: 'Morning',    time: '08:00', icon: 'sunny-outline'         },
+  { label: 'Midday',     time: '12:00', icon: 'sunny'                 },
+  { label: 'Afternoon',  time: '15:00', icon: 'partly-sunny-outline'  },
+  { label: 'Evening',    time: '18:00', icon: 'moon-outline'          },
+  { label: 'Before Bed', time: '21:00', icon: 'bed-outline'           },
 ];
 
 const formatTime = (time: string): string => {
@@ -97,7 +97,7 @@ export default function SettingsScreen() {
                   </View>
                 </View>
                 <View style={{ marginTop: 16 }}>
-                  {PRESET_TIMES.map(({ label, time }) => {
+                  {PRESET_TIMES.map(({ label, time, icon }) => {
                     const isSelected = selectedTimes.includes(time);
                     return (
                       <TouchableOpacity
@@ -105,7 +105,10 @@ export default function SettingsScreen() {
                         style={[styles.timeCard, isSelected && styles.timeCardSelected]}
                         onPress={() => toggleTime(time)}
                       >
-                        <Text style={styles.timeLabel}>{label}</Text>
+                        <View style={styles.timeLeft}>
+                          <Ionicons name={icon} size={16} color={colors.textMid} />
+                          <Text style={styles.timeLabel}>{label}</Text>
+                        </View>
                         <View style={styles.timeRight}>
                           <Text style={styles.timeValue}>{formatTime(time)}</Text>
                           {isSelected && (
@@ -161,6 +164,7 @@ const styles = StyleSheet.create({
   sectionDesc:      { color: colors.textMid, fontSize: 13 },
   timeCard:         { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 14, borderRadius: 12, borderWidth: 1, borderColor: colors.border, marginBottom: 8, backgroundColor: colors.background },
   timeCardSelected: { borderColor: colors.accent, backgroundColor: colors.accentLight },
+  timeLeft:         { flexDirection: 'row', alignItems: 'center', gap: 8 },
   timeLabel:        { color: colors.textDark, fontSize: 15 },
   timeRight:        { flexDirection: 'row', alignItems: 'center' },
   timeValue:        { color: colors.textMid, fontSize: 14 },

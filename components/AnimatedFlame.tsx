@@ -1,7 +1,8 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text } from 'react-native';
+import { Animated } from 'react-native';
 
-export default function AnimatedFlame({ size = 32 }: { size?: number }) {
+export default function AnimatedFlame({ size = 32, color = '#FFFFFF' }: { size?: number; color?: string }) {
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -17,11 +18,7 @@ export default function AnimatedFlame({ size = 32 }: { size?: number }) {
 
   return (
     <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-      <Text style={[styles.flame, { fontSize: size }]}>🔥</Text>
+      <Ionicons name="flame" size={size} color={color} />
     </Animated.View>
   );
 }
-
-const styles = StyleSheet.create({
-  flame: { textAlign: 'center' },
-});
