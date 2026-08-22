@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, SafeAreaView, ScrollView, StatusBar, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, SafeAreaView, ScrollView, StatusBar, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { cancelAllReminders, getSavedReminders, requestPermissions, scheduleReminders } from '../../utils/reminders';
 import { colors, gradient, shadows, shared } from '../../utils/theme';
 
@@ -24,11 +25,15 @@ export default function SettingsScreen() {
   const [enabled, setEnabled]             = useState(false);
   const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
   const [saved, setSaved]                 = useState(false);
+  const [name, setName]                   = useState('');
+  const [nameSaved, setNameSaved]         = useState(false);
 
   useFocusEffect(useCallback(() => {
     const load = async () => {
       const times = await getSavedReminders();
       if (times.length > 0) { setEnabled(true); setSelectedTimes(times); }
+      const savedName = await AsyncStorage.getItem('userName');
+      if (savedName) setName(savedName);
     };
     load();
   }, []));
@@ -58,6 +63,12 @@ export default function SettingsScreen() {
     setSaved(true);
   };
 
+  const handleSaveName = async () => {
+    await AsyncStorage.setItem('userName', name.trim());
+    setNameSaved(true);
+    setTimeout(() => setNameSaved(false), 1500);
+  };
+
   return (
     <>
       <StatusBar barStyle="dark-content" />
@@ -66,6 +77,38 @@ export default function SettingsScreen() {
           <ScrollView showsVerticalScrollIndicator={false}>
             <Text style={shared.screenTitle}>Settings</Text>
             <Text style={[shared.subtitle, styles.subtitleLeft]}>Customise your experience</Text>
+
+            {/* Name */}
+            <View style={styles.section}>
+              <View style={styles.sectionLeft}>
+                <Ionicons name="person-outline" size={20} color={colors.accent} />
+                <View>
+                  <Text style={styles.sectionTitle}>Your Name</Text>
+                  <Text style={styles.sectionDesc}>Used to personalise your greeting</Text>
+                </View>
+              </View>
+              <View style={styles.nameRow}>
+                <TextInput
+                  value={name}
+                  onChangeText={setName}
+                  placeholder="Enter your name"
+                  placeholderTextColor={colors.textLight}
+                  style={styles.nameInput}
+                  onSubmitEditing={handleSaveName}
+                  returnKeyType="done"
+                />
+                <TouchableOpacity
+                  style={[styles.nameSaveButton, nameSaved && styles.saveButtonSaved]}
+                  onPress={handleSaveName}
+                >
+                  <Ionicons
+                    name={nameSaved ? 'checkmark' : 'arrow-forward'}
+                    size={16}
+                    color={colors.white}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
 
             {/* Reminders toggle */}
             <View style={styles.section}>
@@ -160,6 +203,9 @@ const styles = StyleSheet.create({
   section:          { backgroundColor: colors.white, borderRadius: 20, padding: 20, marginBottom: 16, ...shadows.card },
   sectionHeader:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   sectionLeft:      { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 4 },
+  nameRow:          { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12 },
+  nameInput:        { flex: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: colors.textDark, backgroundColor: colors.background },
+  nameSaveButton:   { width: 42, height: 42, borderRadius: 12, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center' },
   sectionTitle:     { color: colors.textDark, fontSize: 16, fontWeight: '600', marginBottom: 2 },
   sectionDesc:      { color: colors.textMid, fontSize: 13 },
   timeCard:         { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 14, borderRadius: 12, borderWidth: 1, borderColor: colors.border, marginBottom: 8, backgroundColor: colors.background },
