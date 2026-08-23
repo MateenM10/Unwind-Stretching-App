@@ -13,7 +13,6 @@ export default function RootLayout() {
       <Stack.Screen name="bodypart" options={{ headerShown: false }} />
       <Stack.Screen name="complete" options={{ headerShown: false }} />
       <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-      <Stack.Screen name="duration" options={{ headerShown: false }} />
     </Stack>
   );
 }

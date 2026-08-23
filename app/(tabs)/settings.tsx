@@ -182,7 +182,7 @@ export default function SettingsScreen() {
                 <Ionicons name="phone-portrait-outline" size={20} color={colors.accent} />
                 <Text style={styles.sectionTitle}>About</Text>
               </View>
-              <Text style={styles.aboutText}>Stretchly</Text>
+              <Text style={styles.aboutText}>Unwind</Text>
               <Text style={styles.aboutVersion}>Version 1.0</Text>
               <Text style={styles.aboutDesc}>
                 Built with React Native + Expo.{'\n'}Helping you move more, one stretch at a time.

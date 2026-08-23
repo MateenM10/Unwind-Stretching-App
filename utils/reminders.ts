@@ -47,7 +47,7 @@ export const scheduleReminders = async (times: string[]): Promise<void> => {
 
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: "Stretch App",
+          title: "Unwind",
           body: message,
         },
         trigger: {
