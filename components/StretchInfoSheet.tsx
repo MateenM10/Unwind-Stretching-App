@@ -1,8 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import React from 'react';
 import {
   Dimensions,
+  ImageSourcePropType,
   Modal,
   ScrollView,
   StyleSheet,
@@ -15,13 +15,13 @@ import { colors, shared } from '../utils/theme';
 
 const { height } = Dimensions.get('window');
 
-const ANIMATIONS: Record<string, any> = {
-  n1: require('../assets/images/animations/neck.gif'),
-  n2: require('../assets/images/animations/earShoulder.gif'),
-
-  
-  
-};
+// Maps a stretch id to its demo GIF. Empty for now — an early pass generated
+// a couple of proof-of-concept animations via an AI video tool, but they
+// carried a visible watermark from the generator and were pulled rather than
+// ship branded output. The lookup and rendering logic below is left in place
+// so a stretch's animation shows automatically the moment a real entry is
+// added here — the UI already gracefully skips the section when one isn't.
+const ANIMATIONS: Record<string, ImageSourcePropType> = {};
 
 interface Props {
   visible: boolean;
@@ -48,7 +48,7 @@ export default function StretchInfoSheet({ visible, onClose, stretchId, stretchN
             <Text style={styles.muscle}>{muscle.toUpperCase()}</Text>
             <Text style={styles.name}>{stretchName}</Text>
 
-            {animation ? (
+            {animation && (
               <View style={styles.animationBox}>
                 <Image
                   source={animation}
@@ -56,11 +56,6 @@ export default function StretchInfoSheet({ visible, onClose, stretchId, stretchN
                   contentFit="contain"
                   autoplay
                 />
-              </View>
-            ) : (
-              <View style={styles.animationPlaceholder}>
-                <Ionicons name="body-outline" size={40} color={colors.textLight} style={{ marginBottom: 8 }} />
-                <Text style={styles.placeholderText}>Animation coming soon</Text>
               </View>
             )}
 
@@ -96,8 +91,6 @@ const styles = StyleSheet.create({
   name:                 { fontSize: 24, fontWeight: '700', color: colors.textDark, marginBottom: 20 },
   animationBox:         { backgroundColor: colors.white, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginBottom: 24, height: 200, overflow: 'hidden' },
   animation:            { width: '100%', height: 200 },
-  animationPlaceholder: { backgroundColor: colors.white, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginBottom: 24, height: 160, borderWidth: 1, borderColor: colors.border },
-  placeholderText:      { fontSize: 13, color: colors.textLight },
   stepsTitle:           { fontSize: 16, fontWeight: '700', color: colors.textDark, marginBottom: 16 },
   stepRow:              { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 14, gap: 12 },
   stepNumber:           { width: 26, height: 26, borderRadius: 13, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },

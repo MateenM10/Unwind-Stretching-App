@@ -30,9 +30,9 @@ const MOTIVATIONS = [
 
 const getGreeting = () => {
   const hour = new Date().getHours();
-  if (hour < 12) return 'Good morning';
-  if (hour < 18) return 'Good afternoon';
-  return 'Good evening';
+  if (hour < 12) return 'Good Morning';
+  if (hour < 18) return 'Good Afternoon';
+  return 'Good Evening';
 };
 
 const getLastStretchedLabel = (lastSessionDate: string | null): string => {
@@ -145,8 +145,8 @@ export default function HomeScreen() {
 
             {/* Hero header */}
             <View style={styles.header}>
-              <Text style={styles.greeting}>{getGreeting()}{greetingName}</Text>
-              <View style={styles.heroBadgeRow}>
+    <Text style={styles.greeting}>{getGreeting()}{greetingName}!</Text>              
+    <View style={styles.heroBadgeRow}>
                 <View style={[styles.lastStretchedBadge, stretchedToday && styles.lastStretchedBadgeSuccess]}>
                   <Text style={[styles.lastStretchedText, stretchedToday && styles.lastStretchedTextSuccess]}>
                     {lastStretchedLabel}
