@@ -1,6 +1,6 @@
 {
   "name": "unwind",
-  "description": "A minimal stretching and wellness companion built with React Native and Expo.",
+  "description": "A calm, minimal stretching companion built with React Native and Expo.",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
