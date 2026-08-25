@@ -6,6 +6,20 @@ I built Unwind to get properly hands-on with React Native, and honestly because 
 
 ---
 
+## Try it yourself
+
+Install [Expo Go](https://apps.apple.com/app/expo-go/id982107779) on your phone, then scan the QR code below to run Unwind directly, no build or setup needed.
+
+![QR code](docs/qr-code-unwind.png)
+
+Or open this link on your phone: [expo.dev/preview/update](https://expo.dev/preview/update?message=Portfolio+demo&updateRuntimeVersion=1.0.0&createdAt=2026-08-25T03%3A56%3A08.546Z&slug=exp&projectId=a6692162-8774-4b48-99b2-1d6770c5c1ee&group=1e0ee6d9-582d-47a1-a968-990ad5a8b064)
+
+Or try it instantly in your browser, no install at all: [unwind-stretching-app.vercel.app](https://unwind-stretching-app.vercel.app)
+
+*(Voice cues and haptics are mobile-only features and won't fire in a browser, but everything else works the same.)*
+
+---
+
 ## Screenshots
 
 | Home | Session | Library |
